@@ -102,6 +102,7 @@
      btop
      brave
      git
+     gh
    ];
 
    fonts.packages = with pkgs; [

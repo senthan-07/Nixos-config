@@ -2,7 +2,14 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, pkgs, ... }:
+{ config, pkgs, linux-omen-module, ... }:
+
+let
+  hpomen = pkgs.callPackage ./hpomen.nix {
+    kernel = config.boot.kernelPackages.kernel;
+    inherit linux-omen-module;
+  };
+in
 
 {
   imports =
@@ -13,6 +20,11 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  #Omen
+  boot.extraModulePackages = [ hpomen ];
+  boot.blacklistedKernelModules = [ "hp_wmi" ];
+  boot.kernelModules = [ "hpomen" ];
  
   # flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];

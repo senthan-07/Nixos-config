@@ -39,6 +39,23 @@
         "type": "github"
       }
     },
+    "linux-omen-module": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789112909,
+        "narHash": "sha256-dcdnRQuq+LzSdG/GdXIvnkTTOaDK+oGIdSHtuiuQ2SM=",
+        "owner": "Sharwesh05",
+        "repo": "linux-omen-module",
+        "rev": "ddfc4bbb786f9cd4726c93184dc74add7cbffaab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Sharwesh05",
+        "repo": "linux-omen-module",
+        "rev": "ddfc4bbb786f9cd4726c93184dc74add7cbffaab",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1789009968,
@@ -79,6 +96,7 @@
     "root": {
       "inputs": {
         "claude-code": "claude-code",
+        "linux-omen-module": "linux-omen-module",
         "nixpkgs": "nixpkgs",
         "opencode-nix": "opencode-nix",
         "zen-browser": "zen-browser"

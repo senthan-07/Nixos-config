@@ -15,14 +15,32 @@
     # OpenCode flake (pre-built patched binary)
     opencode-nix.url = "github:dan-online/opencode-nix";
     opencode-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    #Omen fan control
+    linux-omen-module = {
+      url = "github:Sharwesh05/linux-omen-module/ddfc4bbb786f9cd4726c93184dc74add7cbffaab";
+      flake = false;
+    };
+
   };
 
-  outputs = { self, nixpkgs, zen-browser, claude-code, opencode-nix, ... }: 
+  outputs = { self, nixpkgs, zen-browser, claude-code, opencode-nix, linux-omen-module, ... }: 
   let
     system = "x86_64-linux";
   in {
+
+    packages.${system}.hpomen =
+      (nixpkgs.legacyPackages.${system}).callPackage ./hpomen.nix {
+        kernel = (nixpkgs.legacyPackages.${system}).linuxPackages.kernel;
+        inherit linux-omen-module;
+      };
+
     nixosConfigurations.Omen = nixpkgs.lib.nixosSystem {
       inherit system;
+
+      specialArgs = {
+        inherit linux-omen-module;
+      };
 
       modules = [
         ./configuration.nix

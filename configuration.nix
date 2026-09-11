@@ -110,6 +110,7 @@
      kitty
      python3
      tree
+     lm_sensors
    ];
 
    fonts.packages = with pkgs; [

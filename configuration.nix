@@ -103,11 +103,18 @@
      brave
      git
      gh
+     gnome-extension-manager
+     gnomeExtensions.clipboard-indicator
+     kitty
    ];
 
    fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
    ];
+
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

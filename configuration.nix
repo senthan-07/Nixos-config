@@ -51,6 +51,9 @@
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
 
+  # Niri
+  programs.niri.enable = true;
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";

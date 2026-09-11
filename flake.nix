@@ -4,6 +4,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
+    # Home manager
+    home-manager = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Zen Browser flake
     zen-browser.url = "github:youwen5/zen-browser-flake";
     zen-browser.inputs.nixpkgs.follows = "nixpkgs";
@@ -24,7 +30,7 @@
 
   };
 
-  outputs = { self, nixpkgs, zen-browser, claude-code, opencode-nix, linux-omen-module, ... }: 
+  outputs = { self, nixpkgs, zen-browser, claude-code, opencode-nix, linux-omen-module, home-manager, ... }: 
   let
     system = "x86_64-linux";
   in {
@@ -44,6 +50,7 @@
 
       modules = [
         ./configuration.nix
+        home-manager.nixosModules.home-manager
 
         {
           environment.systemPackages = [
@@ -51,6 +58,7 @@
             claude-code.packages.${system}.default
             opencode-nix.packages.${system}.default
           ];
+          home-manager.users.senthan = import ./home.nix;
         }
       ];
     };

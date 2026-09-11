@@ -1,6 +1,10 @@
-{ config, pkgs, ... }:
+{ config, pkgs, noctalia, ... }:
 
 {
+  imports = [
+    noctalia.homeModules.default
+  ];
+
   home.username = "senthan";
   home.homeDirectory = "/home/senthan";
 
@@ -9,9 +13,14 @@
   home.packages = with pkgs; [
     ripgrep
     fd
+    xwayland-satellite
   ];
 
-  xdg.configFile."niri/config.kdl".source = ./niri.kdl;
-
   programs.home-manager.enable = true;
+
+  programs.noctalia = {
+    enable = true;
+  };
+
+  xdg.configFile."niri/config.kdl".source = ./niri.kdl;
 }

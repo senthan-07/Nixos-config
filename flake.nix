@@ -28,9 +28,15 @@
       flake = false;
     };
 
+    # Noctalia
+    noctalia = {
+      url = "github:noctalia-dev/noctalia";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
-  outputs = { self, nixpkgs, zen-browser, claude-code, opencode-nix, linux-omen-module, home-manager, ... }: 
+  outputs = { self, nixpkgs, zen-browser, claude-code, opencode-nix, linux-omen-module, home-manager, noctalia, ... }:
   let
     system = "x86_64-linux";
   in {
@@ -58,6 +64,11 @@
             claude-code.packages.${system}.default
             opencode-nix.packages.${system}.default
           ];
+
+          home-manager.extraSpecialArgs = {
+            inherit noctalia;
+          };
+
           home-manager.users.senthan = import ./home.nix;
         }
       ];

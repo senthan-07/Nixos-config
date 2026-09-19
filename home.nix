@@ -16,6 +16,8 @@
     xwayland-satellite
   ];
 
+  programs.fish.enable = true;
+
   programs.home-manager.enable = true;
 
   programs.noctalia = {

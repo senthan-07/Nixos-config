@@ -2,26 +2,20 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, pkgs, ... }:
+{ config, pkgs, omen-tools, ... }:
 
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./omen.nix
+      ./limine.nix
+      ./user.nix
+      ./nvidia.nix
+      ./services.nix
+      ./packages/linux-omen-module/module.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
- 
-  # flakes
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
@@ -31,21 +25,10 @@
 
   # Set your time zone.
   time.timeZone = "Asia/Kolkata";
+  time.hardwareClockInLocalTime = true;
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "en_IN";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_IN";
-    LC_IDENTIFICATION = "en_IN";
-    LC_MEASUREMENT = "en_IN";
-    LC_MONETARY = "en_IN";
-    LC_NAME = "en_IN";
-    LC_NUMERIC = "en_IN";
-    LC_PAPER = "en_IN";
-    LC_TELEPHONE = "en_IN";
-    LC_TIME = "en_IN";
-  };
+  i18n.defaultLocale = "en_US.UTF-8";
 
   # Enable the GNOME Desktop Environment.
   services.displayManager.gdm.enable = true;
@@ -81,44 +64,23 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users."senthan" = {
-    isNormalUser = true;
-    description = "Senthan";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-    #  thunderbird
-    ];
-  };
-
-  # Install firefox.
-  programs.firefox.enable = true;
+  # flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
-   environment.systemPackages = with pkgs; [
-     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-     wget
-     efibootmgr
-     vscode
-     btop
-     brave
-     git
-     gh
-     gnome-extension-manager
-     gnomeExtensions.clipboard-indicator
-     kitty
-     python3
-     tree
-     lm_sensors
-   ];
+  environment.systemPackages = with pkgs; [
+    vim wget git efibootmgr fastfetch lm_sensors nvtopPackages.full
+    btop mokutil tree wl-clipboard omen-tools python3 tmux openssl
+    sbctl limine-full
+  ];
 
-   fonts.packages = with pkgs; [
+  fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
-   ];
+  ];
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
@@ -165,6 +127,15 @@
   # and migrated your data accordingly.
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
+
+  boot.tmp.cleanOnBoot = true;
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 4d"; # Deletes files from older generations
+  };
+
   system.stateVersion = "26.05"; # Did you read the comment?
 
 }

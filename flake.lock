@@ -21,24 +21,6 @@
         "type": "github"
       }
     },
-    "flake-utils": {
-      "inputs": {
-        "systems": "systems_2"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -63,17 +45,17 @@
     "linux-omen-module": {
       "flake": false,
       "locked": {
-        "lastModified": 1789112909,
-        "narHash": "sha256-dcdnRQuq+LzSdG/GdXIvnkTTOaDK+oGIdSHtuiuQ2SM=",
+        "lastModified": 1789713131,
+        "narHash": "sha256-s3o8PJuq56aQ9jaINo1i4c2BOmtUUBOV7I0YwSGoCB8=",
         "owner": "Sharwesh05",
         "repo": "linux-omen-module",
-        "rev": "ddfc4bbb786f9cd4726c93184dc74add7cbffaab",
+        "rev": "a6d5de8ce5b6ada973b8527eed5041f779b7b306",
         "type": "github"
       },
       "original": {
         "owner": "Sharwesh05",
         "repo": "linux-omen-module",
-        "rev": "ddfc4bbb786f9cd4726c93184dc74add7cbffaab",
+        "rev": "a6d5de8ce5b6ada973b8527eed5041f779b7b306",
         "type": "github"
       }
     },
@@ -113,36 +95,13 @@
         "type": "github"
       }
     },
-    "opencode-nix": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1777751810,
-        "narHash": "sha256-TmzGCWisrM0vwaUQ3PKllFSNx+FKZnNy0Hoiv7Rpbeo=",
-        "owner": "dan-online",
-        "repo": "opencode-nix",
-        "rev": "5df603be7358122487e41f1249f7df107f3ab43e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "dan-online",
-        "repo": "opencode-nix",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "claude-code": "claude-code",
         "home-manager": "home-manager",
         "linux-omen-module": "linux-omen-module",
         "nixpkgs": "nixpkgs",
-        "noctalia": "noctalia",
-        "opencode-nix": "opencode-nix",
-        "zen-browser": "zen-browser"
+        "noctalia": "noctalia"
       }
     },
     "systems": {
@@ -157,41 +116,6 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_2": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "zen-browser": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788682845,
-        "narHash": "sha256-E03KyK0Sj+ia+FSy47XC4v9enU1C/lGiW5ZKmcJoI1M=",
-        "owner": "youwen5",
-        "repo": "zen-browser-flake",
-        "rev": "3aadc420e763a8243aedd2ce925ae1dc13663ed9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "youwen5",
-        "repo": "zen-browser-flake",
         "type": "github"
       }
     }

@@ -24,6 +24,17 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
+  fileSystems."/run/media/senthan/Disk" =
+    { device = "/dev/disk/by-uuid/DA68F2FE68F2D869";
+      fsType = "ntfs3";
+      options = [
+        "uid=1000"
+        "gid=1000"
+        "umask=022"
+        "nofail"
+      ];
+    };
+
   swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

@@ -14,6 +14,9 @@
     ripgrep
     fd
     xwayland-satellite
+    brave
+    kitty
+    opencode
   ];
 
   programs.fish.enable = true;

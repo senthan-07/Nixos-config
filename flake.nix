@@ -10,21 +10,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Zen Browser flake
-    zen-browser.url = "github:youwen5/zen-browser-flake";
-    zen-browser.inputs.nixpkgs.follows = "nixpkgs";
-
     # Claude Code flake (pre-built binary)
     claude-code.url = "github:sadjow/claude-code-nix";
     claude-code.inputs.nixpkgs.follows = "nixpkgs";
 
-    # OpenCode flake (pre-built patched binary)
-    opencode-nix.url = "github:dan-online/opencode-nix";
-    opencode-nix.inputs.nixpkgs.follows = "nixpkgs";
-
     #Omen fan control
     linux-omen-module = {
-      url = "github:Sharwesh05/linux-omen-module/ddfc4bbb786f9cd4726c93184dc74add7cbffaab";
+      url = "github:Sharwesh05/linux-omen-module/a6d5de8ce5b6ada973b8527eed5041f779b7b306";
       flake = false;
     };
 
@@ -36,22 +28,55 @@
 
   };
 
-  outputs = { self, nixpkgs, zen-browser, claude-code, opencode-nix, linux-omen-module, home-manager, noctalia, ... }:
+  outputs = { self, nixpkgs, claude-code, linux-omen-module, home-manager, noctalia, ... }:
   let
     system = "x86_64-linux";
-  in {
 
-    packages.${system}.hpomen =
-      (nixpkgs.legacyPackages.${system}).callPackage ./hpomen.nix {
-        kernel = (nixpkgs.legacyPackages.${system}).linuxPackages.kernel;
+    pkgs = import nixpkgs {
+      inherit system;
+
+      overlays = [
+        (import ./overlays/opencode.nix)
+      ];
+    };
+
+    sources =
+      builtins.fromJSON
+        (builtins.readFile ./packages/source.json);
+
+    zenSourceForSystem =
+      sources."zen-browser".sources.${system};
+
+    zen-browser-unwrapped =
+      pkgs.callPackage ./packages/zen/zen-browser-unwrapped.nix {
+        version = sources."zen-browser".version;
+        url = zenSourceForSystem.url;
+        hash = zenSourceForSystem.hash;
+      };
+
+    zen-browser =
+      pkgs.callPackage ./packages/zen/zen-browser.nix {
+        inherit zen-browser-unwrapped;
+      };
+
+    omen-tools =
+      pkgs.callPackage ./packages/linux-omen-module/tools.nix {
         inherit linux-omen-module;
       };
+  in {
+
+    packages.${system} = {
+      inherit zen-browser zen-browser-unwrapped omen-tools;
+    };
 
     nixosConfigurations.Omen = nixpkgs.lib.nixosSystem {
       inherit system;
 
       specialArgs = {
-        inherit linux-omen-module;
+        inherit
+          zen-browser
+          linux-omen-module
+          omen-tools;
       };
 
       modules = [
@@ -60,9 +85,8 @@
 
         {
           environment.systemPackages = [
-            zen-browser.packages.${system}.default
+            zen-browser
             claude-code.packages.${system}.default
-            opencode-nix.packages.${system}.default
           ];
 
           home-manager.extraSpecialArgs = {

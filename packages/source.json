@@ -1,0 +1,13 @@
+{
+  "zen-browser": {
+    "version": "1.22.3b",
+    "repo": "zen-browser/desktop",
+    "asset": "zen.linux-x86_64.tar.xz",
+    "sources": {
+      "x86_64-linux": {
+        "url": "https://github.com/zen-browser/desktop/releases/download/1.22.3b/zen.linux-x86_64.tar.xz",
+        "hash": "sha256-Cq7hs/Z/B0rr9/xsL+gkRBvK/UMemZEzZHnBY3BRndA="
+      }
+    }
+  }
+}

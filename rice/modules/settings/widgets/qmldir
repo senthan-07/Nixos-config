@@ -1,0 +1,9 @@
+# Hand-written: settings pages are loaded by URL and never scanned by Quickshell,
+# so a relative import ("../widgets") needs this file to resolve types.
+ActionButton 1.0 ActionButton.qml
+Dropdown 1.0 Dropdown.qml
+EmptyState 1.0 EmptyState.qml
+InputField 1.0 InputField.qml
+Keycap 1.0 Keycap.qml
+SegmentedButtons 1.0 SegmentedButtons.qml
+SliderRow 1.0 SliderRow.qml

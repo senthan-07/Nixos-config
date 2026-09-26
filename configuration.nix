@@ -10,7 +10,7 @@
       ./grub.nix
       # ./limine.nix
       ./user.nix
-      ./hyprland.nix
+      ./rice.nix
       ./nvidia.nix
       ./services.nix
       ./auto-update.nix

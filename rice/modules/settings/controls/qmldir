@@ -1,0 +1,26 @@
+# Hand-written: settings pages are loaded by URL and never scanned by Quickshell,
+# so the relative import ("../controls") needs this file to resolve types.
+singleton Exec 1.0 Exec.qml
+ActionButton 1.0 ActionButton.qml
+AppPicker 1.0 AppPicker.qml
+AutostartStore 1.0 AutostartStore.qml
+Banner 1.0 Banner.qml
+Dialog 1.0 Dialog.qml
+DisplayCanvas 1.0 DisplayCanvas.qml
+EmptyState 1.0 EmptyState.qml
+FadeView 1.0 FadeView.qml
+IconBadge 1.0 IconBadge.qml
+InputField 1.0 InputField.qml
+LevelSlider 1.0 LevelSlider.qml
+ListRow 1.0 ListRow.qml
+MimeDefaults 1.0 MimeDefaults.qml
+MonitorSource 1.0 MonitorSource.qml
+NmInfo 1.0 NmInfo.qml
+Query 1.0 Query.qml
+Segmented 1.0 Segmented.qml
+Select 1.0 Select.qml
+Spinner 1.0 Spinner.qml
+SubHeader 1.0 SubHeader.qml
+TimeField 1.0 TimeField.qml
+Toast 1.0 Toast.qml
+VolumeRow 1.0 VolumeRow.qml

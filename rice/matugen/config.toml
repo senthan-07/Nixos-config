@@ -1,0 +1,69 @@
+# rice ecosystem theming: which matugen templates are rendered, and where to.
+#
+# services/Ecosystem.qml reads this file, keeps only the [templates.*] tables
+# whose target is switched on (the target is the name before the first "_",
+# e.g. kitty_dark -> "kitty"), replaces the placeholders below with absolute
+# paths and writes the result to $XDG_STATE_HOME/rice/matugen.toml. That file
+# is what matugen is actually run with (see apply.sh).
+#
+#   @TEMPLATES@  <shell dir>/matugen/templates
+#   @CONFIG@     $XDG_CONFIG_HOME, or ~/.config
+#   @STATE@      $XDG_STATE_HOME/rice, or ~/.local/state/rice
+#
+# App reloads are done by apply.sh after rendering, not by post_hook, so they
+# can be skipped outside a Hyprland session.
+
+[config]
+version_check = false
+
+# kitty >= 0.38 picks these up by itself and follows the system dark/light
+# preference, so kitty.conf needs no change.
+[templates.kitty_dark]
+input_path = "@TEMPLATES@/kitty-dark.conf"
+output_path = "@CONFIG@/kitty/dark-theme.auto.conf"
+
+[templates.kitty_light]
+input_path = "@TEMPLATES@/kitty-light.conf"
+output_path = "@CONFIG@/kitty/light-theme.auto.conf"
+
+[templates.kitty_nopref]
+input_path = "@TEMPLATES@/kitty.conf"
+output_path = "@CONFIG@/kitty/no-preference-theme.auto.conf"
+
+# libadwaita (GTK 4) and adw-gtk3 named colours; apply.sh adds an @import to gtk.css.
+[templates.gtk_3]
+input_path = "@TEMPLATES@/gtk.css"
+output_path = "@CONFIG@/gtk-3.0/rice-colors.css"
+
+[templates.gtk_4]
+input_path = "@TEMPLATES@/gtk.css"
+output_path = "@CONFIG@/gtk-4.0/rice-colors.css"
+
+[templates.qt_6]
+input_path = "@TEMPLATES@/qtct.conf"
+output_path = "@CONFIG@/qt6ct/colors/rice.conf"
+
+[templates.qt_5]
+input_path = "@TEMPLATES@/qtct.conf"
+output_path = "@CONFIG@/qt5ct/colors/rice.conf"
+
+[templates.btop]
+input_path = "@TEMPLATES@/btop.theme"
+output_path = "@CONFIG@/btop/themes/rice.theme"
+
+[templates.cava]
+input_path = "@TEMPLATES@/cava.ini"
+output_path = "@CONFIG@/cava/themes/rice"
+
+[templates.foot]
+input_path = "@TEMPLATES@/foot.ini"
+output_path = "@CONFIG@/foot/rice-colors.ini"
+
+[templates.fuzzel]
+input_path = "@TEMPLATES@/fuzzel.ini"
+output_path = "@CONFIG@/fuzzel/rice-colors.ini"
+
+# Read by rice/Dotfiles/hypr/Rice/colors.lua (~/.config/hypr/Rice/colors.lua).
+[templates.hyprland]
+input_path = "@TEMPLATES@/hypr-colors.lua"
+output_path = "@CONFIG@/hypr/Rice/wallpaper-colors.lua"

@@ -17,6 +17,7 @@
     brave
     kitty
     opencode
+    vscode
   ];
 
   programs.fish.enable = true;

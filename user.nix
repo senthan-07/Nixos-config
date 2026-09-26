@@ -66,12 +66,6 @@
     disk = "cd /run/media/senthan/Disk";
   };
 
-  # Docker is configured but does NOT start automatically at boot.
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = false;
-  };
-
   environment.sessionVariables = {
     # NIXPKGS_OPENCODE_DISABLE_LEGACY_DB_WORKAROUND = "1";
     # NIXOS_OZONE_WL = "1";

@@ -24,4 +24,13 @@
   # Disable hibernate-related targets
   systemd.targets.hibernate.enable = false;
   systemd.targets.hybrid-sleep.enable = false;
+
+  #Warp
+  services.cloudflare-warp.enable = true;
+  
+  # Docker is configured but does NOT start automatically at boot.
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = false;
+  };
 }

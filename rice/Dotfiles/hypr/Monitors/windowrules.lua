@@ -7,6 +7,23 @@
 
 -- Example window rules that are useful
 
+-- External monitor: workspaces 1-5
+for i = 1, 5 do
+    hl.workspace_rule({
+        workspace = tostring(i),
+        monitor = "HDMI-A-1",
+    })
+end
+
+-- Laptop display: workspaces 6-10
+for i = 6, 10 do
+    hl.workspace_rule({
+        workspace = tostring(i),
+        monitor = "eDP-1",
+    })
+end
+
+-- Ignore maximize requests from all apps
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
     name  = "suppress-maximize-events",

@@ -48,7 +48,7 @@ QtObject {
             if (!Metrics.gpuAvailable) return "No GPU counters";
             if (Metrics.gpuAsleep) return `${Metrics.gpuName || "GPU"} sleeping`;
             return [Metrics.gpuName, isNaN(Metrics.gpuTemp) ? "" : Math.round(Metrics.gpuTemp) + "°C",
-                    Metrics.hybrid ? (Metrics.dgpuActive ? "dGPU on" : "dGPU off") : ""].filter(s => s).join(" · ");
+                    Metrics.hybrid && !Metrics.useNvidia ? "iGPU · dGPU asleep" : ""].filter(s => s).join(" · ");
         case "temp": return SysStats.temperature >= 85 ? "Running hot" : SysStats.temperature >= 70 ? "Warm" : "Normal";
         }
         return "";

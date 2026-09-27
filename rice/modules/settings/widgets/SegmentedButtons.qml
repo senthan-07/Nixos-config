@@ -3,13 +3,13 @@ import QtQuick.Layouts
 import qs.config
 import qs.components
 
-// M3 expressive connected button group (single select).
+// Segmented control (single select): one rounded track, equal-width options
+// and a highlight that slides to the selected one.
 //   SegmentedButtons {
 //       model: [{ value: "top", label: "Top", icon: "vertical_align_top" }, …]
 //       value: Settings.data.barPosition
 //       onActivated: v => Settings.data.barPosition = v
 //   }
-// The selected segment morphs into a full pill; the others keep squarer inner corners.
 // Left/Right arrows move the selection when focused.
 Item {
     id: root
@@ -18,96 +18,130 @@ Item {
     property var value
     property bool iconOnly: false
     property int segmentHeight: 40
-    property int gap: 2
+    property int gap: 2                 // kept for API compatibility
+    readonly property int pad: 4
 
     signal activated(var value)
 
     readonly property int currentIndex: model.findIndex(m => m.value === value)
+    readonly property int count: model.length
+
+    // Widest option decides every option's width, so they're all equal.
+    property real contentWidth: 0
+    function measure() {
+        let w = 0;
+        for (let i = 0; i < measurer.count; i++) {
+            const it = measurer.itemAt(i);
+            if (it) w = Math.max(w, it.implicitWidth);
+        }
+        contentWidth = w;
+    }
+    readonly property real segWidth: iconOnly ? segmentHeight + Tokens.space.m
+        : contentWidth + Tokens.space.xl * 2
+    readonly property real innerWidth: width - pad * 2
+    readonly property real slot: count > 0 ? innerWidth / count : 0
 
     implicitHeight: segmentHeight
-    implicitWidth: row.implicitWidth
+    implicitWidth: segWidth * count + pad * 2
     activeFocusOnTab: true
 
     Keys.onLeftPressed: step(-1)
     Keys.onRightPressed: step(1)
     function step(d) {
-        const i = Math.max(0, Math.min(model.length - 1, currentIndex + d));
+        const i = Math.max(0, Math.min(count - 1, currentIndex + d));
         if (i !== currentIndex) activated(model[i].value);
     }
 
-    RowLayout {
-        id: row
+    // Hidden copies of each option's content, only used for measuring.
+    Repeater {
+        id: measurer
+        model: root.model
+        delegate: Row {
+            required property var modelData
+            visible: false
+            spacing: Tokens.space.xs
+            Icon { visible: !!parent.modelData.icon; text: parent.modelData.icon || ""; size: 18 }
+            StyledText { visible: !root.iconOnly; text: parent.modelData.label || ""; font.weight: Font.DemiBold }
+            onImplicitWidthChanged: root.measure()
+            Component.onCompleted: root.measure()
+        }
+    }
+
+    // Track
+    Rectangle {
         anchors.fill: parent
-        spacing: root.gap
+        radius: height / 2
+        color: Theme.surfaceHighest
+        border.width: root.activeFocus ? 2 : 0
+        border.color: Theme.primary
+    }
+
+    // Sliding selection
+    Rectangle {
+        visible: root.currentIndex >= 0
+        x: root.pad + root.currentIndex * root.slot
+        y: root.pad
+        width: root.slot
+        height: root.height - root.pad * 2
+        radius: height / 2
+        color: Theme.primary
+        Behavior on x { Anim { duration: Motion.duration.medium; easing.bezierCurve: Motion.curve.emphasizedDecel } }
+    }
+
+    Row {
+        x: root.pad
+        y: root.pad
+        height: root.height - root.pad * 2
 
         Repeater {
             model: root.model
 
-            Surface {
+            Item {
                 id: seg
                 required property var modelData
                 required property int index
                 readonly property bool selected: root.currentIndex === index
-                readonly property bool first: index === 0
-                readonly property bool last: index === root.model.length - 1
-                readonly property real outer: height / 2
-                readonly property real inner: selected ? height / 2 : Tokens.radius.xs
+                readonly property color fg: selected ? Theme.primaryFg : Theme.surfaceVariantFg
 
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredWidth: segRow.implicitWidth + Tokens.space.xl * 2
-                Layout.minimumWidth: root.iconOnly ? root.segmentHeight + Tokens.space.m : 0
+                width: root.slot
+                height: parent.height
 
-                radius: 0
-                topLeftRadius: first ? outer : inner
-                bottomLeftRadius: first ? outer : inner
-                topRightRadius: last ? outer : inner
-                bottomRightRadius: last ? outer : inner
-                interactive: true
-                base: selected ? Theme.primary : Theme.surfaceHighest
-                content: selected ? Theme.primaryFg : Theme.surfaceVariantFg
-                border.width: root.activeFocus && selected ? 2 : 0
-                border.color: Theme.primaryContainer
-                onClicked: { root.forceActiveFocus(); if (!selected) root.activated(modelData.value); }
+                // Hover state layer on unselected options.
+                Rectangle {
+                    anchors.fill: parent
+                    radius: height / 2
+                    color: Theme.alpha(Theme.surfaceFg, !seg.selected && area.containsMouse ? 0.08 : 0)
+                    Behavior on color { ColorAnim {} }
+                }
 
-                Behavior on topLeftRadius { Anim { duration: Motion.duration.medium; easing.bezierCurve: Motion.curve.springDefault } }
-                Behavior on bottomLeftRadius { Anim { duration: Motion.duration.medium; easing.bezierCurve: Motion.curve.springDefault } }
-                Behavior on topRightRadius { Anim { duration: Motion.duration.medium; easing.bezierCurve: Motion.curve.springDefault } }
-                Behavior on bottomRightRadius { Anim { duration: Motion.duration.medium; easing.bezierCurve: Motion.curve.springDefault } }
-
-                RowLayout {
-                    id: segRow
+                Row {
                     anchors.centerIn: parent
                     spacing: Tokens.space.xs
-
-                    Item {
-                        // Check mark slides in when selected (only for labelled segments without an icon).
-                        visible: !seg.modelData.icon && !root.iconOnly
-                        implicitWidth: seg.selected ? 18 : 0
-                        implicitHeight: 18
-                        clip: true
-                        Behavior on implicitWidth { Anim { duration: Motion.duration.short } }
-                        Icon {
-                            anchors.centerIn: parent
-                            text: "check"
-                            size: 18
-                            color: seg.content
-                            scale: seg.selected ? 1 : 0.4
-                            Behavior on scale { Anim { duration: Motion.duration.short } }
-                        }
-                    }
                     Icon {
+                        anchors.verticalCenter: parent.verticalCenter
                         visible: !!seg.modelData.icon
                         text: seg.modelData.icon || ""
-                        size: 20
+                        size: 18
                         fill: seg.selected ? 1 : 0
-                        color: seg.content
+                        color: seg.fg
                     }
                     StyledText {
+                        anchors.verticalCenter: parent.verticalCenter
                         visible: !root.iconOnly && !!seg.modelData.label
                         text: seg.modelData.label || ""
-                        color: seg.content
+                        color: seg.fg
                         font.weight: seg.selected ? Font.DemiBold : Font.Medium
+                    }
+                }
+
+                MouseArea {
+                    id: area
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        root.forceActiveFocus();
+                        if (!seg.selected) root.activated(seg.modelData.value);
                     }
                 }
             }

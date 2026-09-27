@@ -87,29 +87,48 @@ SettingsPage {
             anchors.margins: Tokens.space.xl
             spacing: Tokens.space.xl
 
-            ClippingRectangle {
+            Item {
                 implicitWidth: 104
                 implicitHeight: 104
-                radius: 52
-                color: Theme.primary
 
-                StyledText {
-                    anchors.centerIn: parent
-                    visible: avatar.status !== Image.Ready
-                    text: (page.displayName || "?").charAt(0).toUpperCase()
-                    color: Theme.primaryFg
-                    font.pixelSize: 48
-                    font.weight: Font.Bold
-                }
-                Image {
-                    id: avatar
+                ClippingRectangle {
                     anchors.fill: parent
-                    source: page.v("avatar", "") ? "file://" + page.v("avatar", "") : ""
-                    fillMode: Image.PreserveAspectCrop
-                    sourceSize.width: 208
-                    asynchronous: true
-                    opacity: status === Image.Ready ? 1 : 0
-                    Behavior on opacity { Anim {} }
+                    radius: 52
+                    color: Theme.primary
+
+                    StyledText {
+                        anchors.centerIn: parent
+                        visible: avatar.status !== Image.Ready
+                        text: (page.displayName || "?").charAt(0).toUpperCase()
+                        color: Theme.primaryFg
+                        font.pixelSize: 48
+                        font.weight: Font.Bold
+                    }
+                    Image {
+                        id: avatar
+                        anchors.fill: parent
+                        source: Avatar.source
+                        cache: false
+                        fillMode: Image.PreserveAspectCrop
+                        sourceSize.width: 208
+                        asynchronous: true
+                        opacity: status === Image.Ready ? 1 : 0
+                        Behavior on opacity { Anim {} }
+                    }
+                }
+
+                // Edit badge: opens the profile picture picker.
+                Surface {
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    width: 34; height: 34; radius: 17
+                    interactive: true
+                    base: Theme.primary
+                    content: Theme.primaryFg
+                    border.width: 3
+                    border.color: Theme.primaryContainer
+                    onClicked: Avatar.pick()
+                    Icon { anchors.centerIn: parent; text: "edit"; size: 16; fill: 1; color: Theme.primaryFg }
                 }
             }
 

@@ -1,0 +1,45 @@
+
+add_newline = true
+command_timeout = 300
+
+# ===== PROMPT FORMAT =====
+format = "$username@$hostname $directory $python $character"
+
+# Keep the prompt on a clean line
+[line_break]
+disabled = false
+
+# ===== USER =====
+[username]
+show_always = true
+style_user = "bold green"
+style_root = "bold red"
+format = "[$user]($style)"
+
+# ===== HOST =====
+[hostname]
+ssh_only = false
+trim_at = "."
+style = "bold yellow"
+format = "[$hostname]($style)"
+
+# ===== DIRECTORY =====
+[directory]
+truncation_length = 0
+style = "bold cyan"
+format = "[$path]($style)"
+
+# ===== PYTHON ENV =====
+[python]
+symbol = " "
+style = "bold blue"
+format = "[$symbol${pyenv_prefix}(${version}) ($virtualenv)]($style)"
+
+# ===== PROMPT SYMBOL =====
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"
+
+# ===== COMMAND DURATION =====
+[cmd_duration]
+disabled = true

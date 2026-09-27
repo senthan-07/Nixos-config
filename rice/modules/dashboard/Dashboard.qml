@@ -7,12 +7,10 @@ import qs.config
 import qs.components
 import qs.services
 
-// Left-hand dashboard: weather, system info and an app drawer, each on its
-// own tab. Slides in from the left edge; Escape or an outside click closes it.
+// Left-hand dashboard: weather and system info, each on its own tab. Slides in from the left edge; Escape or an outside click closes it.
 //   Esc                close        Ctrl+Tab / Ctrl+Shift+Tab   next / previous tab
-//   Ctrl+1..3          jump to tab  wheel over the tab bar       switch tab
+//   Ctrl+1..2          jump to tab  wheel over the tab bar       switch tab
 //   ↑ ↓ PgUp PgDn Home End  scroll weather / info    R  refresh weather
-//   (drawer) type to search, arrows + Enter to launch
 PanelWindow {
     id: root
 
@@ -43,7 +41,7 @@ PanelWindow {
     // Views are created on first use and kept afterwards so switching back is
     // instant and keeps scroll positions.
     function loadCurrent() {
-        const loader = ({ weather: weather, info: info, drawer: drawer })[DashboardState.view];
+        const loader = ({ weather: weather, info: info })[DashboardState.view];
         if (loader && !loader.active) loader.active = true;
     }
     Component.onCompleted: loadCurrent()
@@ -80,17 +78,14 @@ PanelWindow {
                     DashboardState.close();
                 } else if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab)) {
                     DashboardState.cycle(event.key === Qt.Key_Backtab || (event.modifiers & Qt.ShiftModifier) ? -1 : 1);
-                } else if ((event.modifiers & Qt.ControlModifier) && event.key >= Qt.Key_1 && event.key <= Qt.Key_3) {
+                } else if ((event.modifiers & Qt.ControlModifier) && event.key >= Qt.Key_1 && event.key <= Qt.Key_2) {
                     DashboardState.setView(DashboardState.views[event.key - Qt.Key_1]);
-                } else if (DashboardState.view !== "drawer" && [Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home, Qt.Key_End].includes(event.key)) {
+                } else if ([Qt.Key_Up, Qt.Key_Down, Qt.Key_PageUp, Qt.Key_PageDown, Qt.Key_Home, Qt.Key_End].includes(event.key)) {
                     const view = (DashboardState.view === "weather" ? weather : info).item;
                     const page = keys.height * 0.8;
                     view?.scrollBy(({ [Qt.Key_Up]: -80, [Qt.Key_Down]: 80, [Qt.Key_PageUp]: -page, [Qt.Key_PageDown]: page, [Qt.Key_Home]: -1e6, [Qt.Key_End]: 1e6 })[event.key]);
                 } else if (DashboardState.view === "weather" && event.key === Qt.Key_R && !(event.modifiers & Qt.ControlModifier)) {
                     Weather.refresh();
-                } else if (DashboardState.view === "drawer" && event.text.length === 1 && event.text.trim() !== "") {
-                    // Start typing anywhere to search the drawer.
-                    drawer.item?.typeAhead(event.text);
                 } else {
                     return;
                 }
@@ -128,18 +123,6 @@ PanelWindow {
                         visible: DashboardState.view === "info"
                         sourceComponent: InfoView {
                             active: root.shown && DashboardState.view === "info"
-                        }
-                    }
-
-                    Loader {
-                        id: drawer
-                        anchors.fill: parent
-                        active: false
-                        visible: DashboardState.view === "drawer"
-                        sourceComponent: DrawerView {
-                            active: root.shown && DashboardState.view === "drawer"
-                            onLaunched: DashboardState.close()
-                            onDismissed: keys.forceActiveFocus()
                         }
                     }
                 }

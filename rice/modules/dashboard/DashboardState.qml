@@ -8,14 +8,15 @@ import qs.services
 
 // Open state, active tab and IPC for the left dashboard.
 //   qs -c rice ipc call dashboard toggle | open | close
-//   qs -c rice ipc call dashboard openTab weather|info|drawer
+//   qs -c rice ipc call dashboard openTab weather|info
 Singleton {
     id: root
 
-    readonly property var views: ["weather", "info", "drawer"]
+    readonly property var views: ["weather", "info"]
 
     property bool open: false
-    property string view: store.get("view", "weather")
+    // (a stored "drawer" from before the drawer was removed falls back to weather)
+    property string view: views.indexOf(store.get("view", "")) >= 0 ? store.get("view", "") : "weather"
     property real closedAt: 0
 
     function setView(name) {

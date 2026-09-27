@@ -4,9 +4,9 @@
 
 | What | Where | Notes |
 |---|---|---|
-| Shell code (QML) | `~/Modules/nixos/rice` | Installed read-only to `/etc/xdg/quickshell/rice` by `rice.nix` |
+| Shell code (QML) | `~/Modules/nixos/rice` | Runs live via `~/.config/quickshell/rice` (a Dotfiles link); a read-only copy is also installed to `/etc/xdg/quickshell/rice` by `rice.nix` |
 | Packages, fonts, services, PAM | `~/Modules/nixos/rice.nix` | Imported from `configuration.nix` |
-| Dotfiles repo | `~/Modules/nixos/rice/Dotfiles` | Its own git repo (github.com/Sharwesh05/Dotfiles); git-ignored by the nixos repo, so it is **not** copied into the Nix store |
+| Dotfiles | `~/Modules/nixos/rice/Dotfiles` | Part of the nixos repo; linked into `~/.config` by `Dotfiles/symlink`. Left out of the read-only system copy of the shell |
 | Hyprland config (Lua) | `Dotfiles/hypr` → `~/.config/hypr` | rice parts: `hypr/Rice/rice.lua` (binds, autostart, rules), `hypr/Rice/colors.lua` (wallpaper border colours) |
 | Generated app themes | `Dotfiles/<app>/…` → `~/.config/<app>` | See the table below |
 | Autostart entries | `Dotfiles/autostart` → `~/.config/autostart` | Managed from Settings → Autostart; run at login by `dex` |
@@ -28,7 +28,7 @@
 - It removes stale links, but only ones that point into the Dotfiles folder.
 - It skips `.git`, `.vscode`, `README.md` and itself. Run it again after adding a new folder.
 
-Currently linked: `autostart btop cava foot fuzzel gtk-3.0 gtk-4.0 hypr kitty qt5ct qt6ct starship.toml`.
+Currently linked: `autostart btop cava foot fuzzel gtk-3.0 gtk-4.0 hypr kitty qt5ct qt6ct quickshell starship.toml`.
 
 ## Theming (matugen)
 

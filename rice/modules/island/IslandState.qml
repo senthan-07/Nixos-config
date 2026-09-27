@@ -12,7 +12,7 @@ import qs.services
 //
 // Priority of what the pill shows (highest first):
 //   hub (expanded, user-opened) > osd (volume/brightness change)
-//   > notification preview > media (playing) > timer (pomodoro/stopwatch) > idle
+//   > notification preview > media (playing) > timer (pomodoro) > idle
 Singleton {
     id: root
 
@@ -137,7 +137,7 @@ Singleton {
     }
 
     // ---- Timers --------------------------------------------------------
-    readonly property bool timerActive: Timers.pomodoroRunning || Timers.stopwatchRunning
+    readonly property bool timerActive: Timers.pomodoroRunning
 
     // ---- Resulting mode ------------------------------------------------
     readonly property string mode: !enabled || Panels.locked ? "idle"
@@ -198,7 +198,6 @@ Singleton {
         function tools(): void { root.toggle("tools"); }
         function tool(id: string): string { return root.runTool(id) ? "ok" : "unknown tool"; }
         function pomodoro(): void { Timers.toggle(); }
-        function stopwatch(): void { Timers.toggleStopwatch(); }
         function lyrics(): void { root.setCompactLyrics(!root.compactLyrics); }
         function mediaStyle(style: string): void { root.setMediaStyle(style); }   // brief | always
         function osd(kind: string): void { root.showOsdFor(kind || "volume"); }

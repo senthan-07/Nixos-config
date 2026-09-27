@@ -10,7 +10,7 @@ Surface {
     id: root
 
     required property ShellScreen screen
-    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(screen)
+    readonly property HyprlandMonitor monitor: HyprMonitors.forScreen(screen)
     readonly property int activeId: monitor?.activeWorkspace?.id ?? 1
     readonly property var workspaces: Hyprland.workspaces.values.filter(w => w.id > 0)
     readonly property int count: Math.max(5, activeId, ...workspaces.map(w => w.id))

@@ -207,7 +207,7 @@ Singleton {
     }
 
     function runAction(action) {
-        if (action) action.execute();
+        if (action) Apps.run(action.command);
     }
 
     function closeAll(key) {

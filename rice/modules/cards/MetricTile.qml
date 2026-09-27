@@ -4,8 +4,9 @@ import qs.config
 import qs.components
 import qs.services
 
-// Expressive metric tile: label, one-minute trend and a big value, with a
-// cookie badge in the corner that grows spikier as the load rises.
+// Metric tile: badge + title on top, one-minute trend across the middle,
+// big value and supporting text at the bottom. Everything stays inside the
+// card. The badge gets spikier (and spins) as the load rises.
 //   MetricTile { metric: "memory" }
 Rectangle {
     id: root
@@ -15,7 +16,7 @@ Rectangle {
 
     readonly property MetricInfo info: MetricInfo { metric: root.metric }
     readonly property bool dense: width < 220 || height < 150
-    readonly property real badgeSize: Math.min(width * 0.4, height * 0.62, 104) * (1 + info.level * 0.12)
+    readonly property bool showTrend: info.available && height >= 120
 
     implicitWidth: 272
     implicitHeight: 176
@@ -28,119 +29,130 @@ Rectangle {
 
     Behavior on color { ColorAnim {} }
 
-    CookieShape {
-        id: badge
-        width: root.badgeSize
-        height: width
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: -width * 0.16
-        anchors.bottomMargin: -height * 0.18
-        sides: root.info.level >= 0.82 ? 12 : root.info.level >= 0.48 ? 8 : 5
-        depth: root.info.level >= 0.82 ? 0.16 : 0.1
-        color: root.info.accent
-        rotation: 18
-
-        Behavior on width { Anim { duration: Motion.duration.long; easing.bezierCurve: Motion.curve.springDefault } }
-
-        RotationAnimation on rotation {
-            running: root.running && root.visible && root.info.level > 0.48
-            from: 18; to: 378
-            duration: 24000 - root.info.level * 12000
-            loops: Animation.Infinite
-        }
-
-        Icon {
-            anchors.centerIn: parent
-            anchors.horizontalCenterOffset: -parent.width * 0.08
-            anchors.verticalCenterOffset: -parent.height * 0.08
-            rotation: -parent.rotation
-            text: root.info.icon
-            size: root.dense ? 20 : 26
-            fill: 1
-            color: root.info.accentFg
-        }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: root.dense ? Tokens.space.m : Tokens.space.l
-        spacing: 2
+        spacing: Tokens.space.xs
 
+        // ---- header
         RowLayout {
             Layout.fillWidth: true
-            StyledText {
+            spacing: Tokens.space.s
+
+            CookieShape {
+                id: badge
+                readonly property real size: root.dense ? 30 : 36
+                Layout.preferredWidth: size
+                Layout.preferredHeight: size
+                sides: root.info.level >= 0.82 ? 12 : root.info.level >= 0.48 ? 8 : 6
+                depth: root.info.level >= 0.82 ? 0.16 : 0.1
+                color: root.info.accent
+
+                RotationAnimation on rotation {
+                    running: root.running && root.visible && root.info.level > 0.48
+                    from: 0; to: 360
+                    duration: 24000 - root.info.level * 12000
+                    loops: Animation.Infinite
+                }
+
+                Icon {
+                    anchors.centerIn: parent
+                    rotation: -parent.rotation
+                    text: root.info.icon
+                    size: root.dense ? 16 : 19
+                    fill: 1
+                    color: root.info.accentFg
+                }
+            }
+
+            ColumnLayout {
                 Layout.fillWidth: true
-                text: root.info.label
-                color: root.info.containerFg
-                font.pixelSize: root.dense ? Tokens.font.l : Tokens.font.xl
-                font.weight: Font.Bold
+                spacing: -2
+                StyledText {
+                    Layout.fillWidth: true
+                    text: root.info.label
+                    color: root.info.containerFg
+                    font.pixelSize: root.dense ? Tokens.font.m : Tokens.font.l
+                    font.weight: Font.Bold
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: !root.dense && text !== ""
+                    text: root.metric === "cpu" ? "Processor load" : root.info.detail
+                    color: Theme.alpha(root.info.containerFg, 0.72)
+                    font.pixelSize: Tokens.font.xs
+                }
             }
-            // Temperature badge for the processor tile.
-            Icon {
+
+            // Temperature chip for the processor tile.
+            Rectangle {
                 visible: root.metric === "cpu" && SysStats.temperature > 0
-                text: "thermostat"
-                size: 16
-                fill: 1
-                color: Theme.alpha(root.info.containerFg, 0.8)
-            }
-            StyledText {
-                visible: root.metric === "cpu" && SysStats.temperature > 0
-                text: Math.round(SysStats.temperature) + "°"
-                color: Theme.alpha(root.info.containerFg, 0.85)
-                font.weight: Font.DemiBold
-                font.features: { "tnum": 1 }
+                implicitWidth: tempRow.implicitWidth + Tokens.space.m
+                implicitHeight: 24
+                radius: 12
+                color: Theme.alpha(root.info.containerFg, 0.1)
+                Row {
+                    id: tempRow
+                    anchors.centerIn: parent
+                    spacing: 2
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "thermostat"
+                        size: 14
+                        fill: 1
+                        color: root.info.containerFg
+                    }
+                    StyledText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Math.round(SysStats.temperature) + "°"
+                        color: root.info.containerFg
+                        font.pixelSize: Tokens.font.s
+                        font.weight: Font.DemiBold
+                        font.features: { "tnum": 1 }
+                    }
+                }
             }
         }
 
-        StyledText {
-            Layout.fillWidth: true
-            Layout.rightMargin: root.badgeSize * 0.4
-            visible: !root.dense && text !== ""
-            text: root.metric === "cpu" ? "Processor load" : root.info.detail
-            color: Theme.alpha(root.info.containerFg, 0.75)
-            font.pixelSize: Tokens.font.s
-        }
-
+        // ---- trend, full width
         Sparkline {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: 20
-            Layout.topMargin: Tokens.space.xs
-            Layout.rightMargin: root.badgeSize * 0.55
-            visible: root.info.available && root.height >= 120
+            Layout.minimumHeight: 18
+            visible: root.showTrend
             active: visible && root.running
             values: root.info.history
             floor: 0.25
             headroom: 1.25
             color: root.info.accent
             lineWidth: 2.2
-            fillOpacity: 0.2
+            fillOpacity: 0.22
         }
+        Item { Layout.fillHeight: true; visible: !root.showTrend }
 
-        Item {
-            Layout.fillHeight: true
-            visible: !(root.info.available && root.height >= 120)
-        }
-
-        StyledText {
+        // ---- value + supporting text
+        RowLayout {
             Layout.fillWidth: true
-            Layout.rightMargin: root.badgeSize * 0.45
-            text: root.info.valueText
-            color: root.info.containerFg
-            font.family: CardStyle.display
-            font.pixelSize: root.dense ? 30 : 40
-            font.weight: Font.Bold
-            font.features: { "tnum": 1 }
-        }
+            spacing: Tokens.space.s
 
-        StyledText {
-            Layout.fillWidth: true
-            Layout.rightMargin: root.badgeSize * 0.55
-            visible: !root.dense && text !== ""
-            text: root.info.available ? root.info.supporting : "Not available on this machine"
-            color: Theme.alpha(root.info.containerFg, 0.75)
-            font.pixelSize: Tokens.font.s
+            StyledText {
+                text: root.info.valueText
+                color: root.info.containerFg
+                font.family: CardStyle.display
+                font.pixelSize: root.dense ? 28 : 36
+                font.weight: Font.Bold
+                font.features: { "tnum": 1 }
+            }
+            Item { Layout.fillWidth: true }
+            StyledText {
+                Layout.alignment: Qt.AlignBottom
+                Layout.bottomMargin: 6
+                visible: !root.dense && text !== ""
+                text: root.info.available ? root.info.supporting : "Not available"
+                color: Theme.alpha(root.info.containerFg, 0.72)
+                font.pixelSize: Tokens.font.s
+                horizontalAlignment: Text.AlignRight
+            }
         }
     }
 }

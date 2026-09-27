@@ -51,10 +51,27 @@ Singleton {
         usage = u;
         usageFile.setText(JSON.stringify(u));
 
-        if (entry.runInTerminal)
-            Quickshell.execDetached([Settings.data.terminal, "-e", ...entry.command]);
-        else
-            entry.execute();
+        const cmd = entry.runInTerminal ? [Settings.data.terminal, "-e", ...entry.command] : entry.command;
+        run(cmd, entry.workingDirectory);
+    }
+
+    // Start a program detached, from the home folder, without variables that
+    // only make sense for rice itself. ELECTRON_RUN_AS_NODE (inherited when
+    // rice is started from an Electron app's terminal, e.g. VS Code) makes
+    // Electron apps like Obsidian run as plain Node and never open a window.
+    function run(command, workingDirectory) {
+        if (!command || !command.length) return;
+        Quickshell.execDetached({
+            command: command,
+            workingDirectory: workingDirectory || Paths.home,
+            environment: {
+                ELECTRON_RUN_AS_NODE: null,
+                ELECTRON_NO_ATTACH_CONSOLE: null,
+                VSCODE_CLI: null,
+                VSCODE_PID: null,
+                VSCODE_IPC_HOOK_CLI: null
+            }
+        });
     }
 
     FileView {

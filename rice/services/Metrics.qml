@@ -6,9 +6,10 @@ import Quickshell.Io
 
 // Rolling one-minute histories for the system cards (1 Hz, 60 samples).
 // CPU and network are read here directly from /proc so graphs move every
-// second; memory and temperature come from SysStats. The GPU is read from
-// amdgpu's sysfs counter; nvidia-smi is used only when no iGPU counter exists
-// and the card is awake (polling a dGPU keeps it from runtime-suspending).
+// second; memory and temperature come from SysStats. The GPU prefers the NVIDIA
+// card via nvidia-smi whenever it is awake (always, in dGPU/MUX mode); when it
+// is runtime-suspended it is never polled (that would wake it) and the amdgpu
+// sysfs counter is shown instead.
 Singleton {
     id: root
 
@@ -169,13 +170,11 @@ Singleton {
         if (!gpuAvailable) return;
         gpuTick++;
         if (nvidiaDir) nvPower.reload();
-        if (amdDir) {
+        if (useNvidia) {
+            // Streamed by the nvidia-smi loop below (5 s), nothing to poll here.
+        } else if (amdDir) {
             amdBusy.reload();
             if (gpuTick % 2 === 0 && !amdTemp.running) amdTemp.running = true;
-        } else if (nvidiaDir && !gpuAsleep && nvKnown) {
-            // nvidia-smi is slow-ish; every 2s. Only reached when there is no
-            // iGPU counter, i.e. a desktop where the NVIDIA card is always on.
-            if (gpuTick % 2 === 0 && !nvSmi.running) nvSmi.running = true;
         }
     }
 
@@ -186,6 +185,10 @@ Singleton {
     readonly property bool hybrid: nvidiaDir !== "" && amdDir !== ""
     property bool nvKnown: false
     property bool dgpuActive: false
+    // Show NVIDIA whenever the card is awake; only fall back to the iGPU while
+    // it sleeps, so rice never wakes a suspended dGPU.
+    readonly property bool useNvidia: nvidiaDir !== "" && nvKnown && dgpuActive
+    onUseNvidiaChanged: { gpuHistory = []; gpuName = ""; gpuTemp = NaN; gpuMemUsed = NaN; gpuMemTotal = NaN; }
 
     FileView {
         id: nvPower
@@ -200,19 +203,22 @@ Singleton {
         }
     }
 
+    // Like `watch -n 5 nvidia-smi`, but one long-running process: nvidia-smi's
+    // loop mode prints a CSV line every 5 seconds while the card is in use.
     Process {
         id: nvSmi
+        running: root.useNvidia
         command: ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu,memory.used,memory.total,name",
-            "--format=csv,noheader,nounits"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const f = text.split("\n")[0].split(",").map(s => s.trim());
+            "--format=csv,noheader,nounits", "-lms", "3000"]
+        stdout: SplitParser {
+            onRead: line => {
+                const f = line.split(",").map(s => s.trim());
                 if (f.length < 5 || isNaN(parseFloat(f[0]))) return;
                 root.gpu = parseFloat(f[0]) / 100;
                 root.gpuTemp = parseFloat(f[1]);
                 root.gpuMemUsed = parseFloat(f[2]);
                 root.gpuMemTotal = parseFloat(f[3]);
-                root.gpuName = f[4].replace(/^NVIDIA\s+/, "").replace(/GeForce\s+/, "");
+                root.gpuName = f[4].replace(/^NVIDIA\s+/, "").replace(/GeForce\s+/, "").replace(/\s+Laptop GPU$/, "");
                 root.gpuHistory = root.push(root.gpuHistory, root.gpu);
             }
         }
@@ -226,7 +232,7 @@ Singleton {
             const v = parseInt(text());
             if (isNaN(v)) return;
             root.gpu = v / 100;
-            if (!root.gpuName) root.gpuName = "Radeon";
+            root.gpuName = "Radeon";
             root.gpuHistory = root.push(root.gpuHistory, root.gpu);
         }
     }

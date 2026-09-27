@@ -14,7 +14,7 @@ Loader {
         cpu: liquid, memory: liquid, gpu: liquid, temp: liquid,
         cpuTile: tile, memTile: tile, gpuTile: tile,
         network: network, storage: storage, battery: battery,
-        calendar: calendar, todo: todo
+        calendar: calendar, todo: todo, cava: cava
     })
 
     sourceComponent: components[type] ?? missing
@@ -32,6 +32,7 @@ Loader {
     Component { id: battery; BatteryCard { running: root.running; elevated: root.elevated } }
     Component { id: calendar; CalendarCard { elevated: root.elevated } }
     Component { id: todo; TodoCard { elevated: root.elevated } }
+    Component { id: cava; CavaCard { running: root.running; elevated: root.elevated } }
     Component {
         id: missing
         EmptyState { icon: "help"; text: `Unknown card "${root.type}"` }

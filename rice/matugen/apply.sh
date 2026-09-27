@@ -68,6 +68,8 @@ restore() {
             fi
             rm -f "$conf/gtk-$v/rice-colors.css"
         done
+        rm -f "$conf/gtk-3.0/settings.ini"
+        command -v gsettings >/dev/null && gsettings reset org.gnome.desktop.interface gtk-theme >/dev/null 2>&1
         ;;
     hyprland)
         rm -f "$conf/hypr/Rice/wallpaper-colors.lua" "$state/hypr-colors.lua"
@@ -120,6 +122,17 @@ if has gtk; then
             { printf '%s\n' "$import_line"; cat "$css"; } >"$css.rice-tmp" && mv -f "$css.rice-tmp" "$css"
         fi
     done
+fi
+
+# GTK 3 ignores color-scheme and follows the theme name: use adw-gtk3 (dark or
+# light) so dialogs match, and so rice-colors.css (adw-gtk3's named colours) applies.
+if has gtk; then
+    gtk_theme=adw-gtk3
+    [[ "$mode" == dark ]] && gtk_theme=adw-gtk3-dark
+    mkdir -p "$conf/gtk-3.0"
+    printf '[Settings]\ngtk-theme-name=%s\ngtk-application-prefer-dark-theme=%s\n' \
+        "$gtk_theme" "$([[ "$mode" == dark ]] && echo 1 || echo 0)" >"$conf/gtk-3.0/settings.ini"
+    command -v gsettings >/dev/null && gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" >/dev/null 2>&1
 fi
 
 if has qt; then

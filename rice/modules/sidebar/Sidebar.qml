@@ -16,9 +16,14 @@ PanelWindow {
 
     screen: Quickshell.screens[0]
     visible: Panels.sidebar || panel.x < width
-    anchors { top: true; bottom: true; right: true }
-    margins { top: Tokens.space.s; bottom: Tokens.space.s; right: Tokens.space.s }
+    // Only as tall as its content (capped to the screen, then it scrolls).
+    anchors.top: true
+    anchors.right: true
+    margins.top: Tokens.space.s
+    margins.right: Tokens.space.s
     implicitWidth: Tokens.sidebarWidth
+    readonly property real maxHeight: (screen?.height ?? 1080) - Tokens.bar.height - Tokens.bar.gap - Tokens.space.s * 3
+    implicitHeight: Math.min(maxHeight, pages.height + Tokens.space.l * 2)
     exclusiveZone: 0
     color: "transparent"
     WlrLayershell.namespace: "rice-sidebar"

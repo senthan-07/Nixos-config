@@ -7,7 +7,7 @@ import qs.services
 // Expanded island: tab strip + Media / Focus / Tools pages.
 // Keys: Esc close, Tab / Shift+Tab or 1-4 switch tabs; per tab:
 //   Media: Space play/pause, ←/→ seek 5 s, Shift+←/→ previous/next
-//   Focus: Space pomodoro start/pause, R reset, N skip, S stopwatch, L lap
+//   Focus: Space pomodoro start/pause, R reset, N skip
 //   Tools: ←/→ select, Enter run
 FocusScope {
     id: root
@@ -35,8 +35,6 @@ FocusScope {
             if (e.key === Qt.Key_Space) Timers.toggle();
             else if (e.key === Qt.Key_R) Timers.reset();
             else if (e.key === Qt.Key_N) Timers.skip();
-            else if (e.key === Qt.Key_S) Timers.toggleStopwatch();
-            else if (e.key === Qt.Key_L) Timers.lap();
             else return;
         } else if (tab === "tools") {
             if (e.key === Qt.Key_Left || e.key === Qt.Key_Up) tools.move(-1);

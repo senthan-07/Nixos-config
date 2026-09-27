@@ -29,6 +29,7 @@ var panelKeys = [
     { area: "Capture", keys: "Enter · arrows · Esc", title: "Confirm, nudge the selection, cancel" },
     { area: "Desktop edit", keys: "Tab · arrows · Del", title: "Select, move and remove widgets" },
     { area: "Power menu", keys: "← → · Enter · Esc", title: "Choose, run, close" },
+    { area: "Switcher", keys: "Alt + Tab · release Alt", title: "Switch between windows on this workspace" },
     { area: "Panels", keys: "Esc", title: "Close the sidebar, dashboard, island or launcher" },
     { area: "Sidebar", keys: "Click / right-click a tile", title: "Toggle it / open its details" },
     { area: "Bar", keys: "Click the clock", title: "Open the island hub" },

@@ -25,6 +25,7 @@ import qs.modules.polkit
 import qs.modules.power
 import qs.modules.settings
 import qs.modules.sidebar
+import qs.modules.switcher
 
 ShellRoot {
     Component.onCompleted: {
@@ -32,6 +33,7 @@ ShellRoot {
         // startup (IPC targets, notification server, idle/night light,
         // polkit agent, weather cache, first-run theming).
         Panels.ready;
+        Avatar.path;
         Notifs.popups;
         Ecosystem.enabled;
         Idle.enabled;
@@ -58,10 +60,12 @@ ShellRoot {
 
     DockHost {}
     Launcher {}
+    Switcher {}
     Sidebar {}
     Dashboard {}
     NotificationPopups {}
     Osd {}
+    ReloadToast {}
     LockKeysOsd {}
     CaptureOverlay {}
     PowerMenu {}

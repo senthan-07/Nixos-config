@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.config
 
-// Hub "Focus" tab: calendar, pomodoro and stopwatch side by side.
+// Hub "Focus" tab: calendar and pomodoro side by side.
 Item {
     id: root
 
@@ -19,10 +19,6 @@ Item {
         }
         PomodoroCard {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-        }
-        StopwatchCard {
-            Layout.preferredWidth: 220
             Layout.fillHeight: true
         }
     }

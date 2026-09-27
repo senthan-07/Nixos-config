@@ -273,6 +273,7 @@ Item {
                 Layout.fillWidth: true
                 progress: root.length > 0 ? root.position / root.length : 0
                 playing: root.player?.isPlaying ?? false
+                amplitude: 0            // flat bar, no wave
                 seekable: (root.player?.canSeek ?? false) && root.length > 0
                 color: root.accent
                 track: MediaPalette.track

@@ -173,11 +173,26 @@ Item {
                         Image {
                             id: avatarImage
                             anchors.fill: parent
-                            source: root.avatar ? "file://" + root.avatar : ""
+                            source: Avatar.source
+                            cache: false
                             fillMode: Image.PreserveAspectCrop
                             sourceSize.width: 180
                             asynchronous: true
                         }
+                    }
+
+                    // Edit badge: opens the profile picture picker.
+                    Surface {
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        width: 30; height: 30; radius: 15
+                        interactive: true
+                        base: Theme.primary
+                        content: Theme.primaryFg
+                        border.width: 3
+                        border.color: Theme.surfaceContainer
+                        onClicked: Avatar.pick()
+                        Icon { anchors.centerIn: parent; text: "edit"; size: 15; fill: 1; color: Theme.primaryFg }
                     }
                 }
 

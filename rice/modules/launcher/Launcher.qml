@@ -244,7 +244,7 @@ PanelWindow {
                     out.push({
                         kind: "action", key: `act:${e.id}:${a.id}`, parentKey: it.key,
                         appIcon: a.icon || e.icon || "", title: a.name, subtitle: "", hint: "Run",
-                        run: () => { a.execute(); return true; }
+                        run: () => { Apps.run(a.command); return true; }
                     });
                 }
             }

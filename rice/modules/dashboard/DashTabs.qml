@@ -9,8 +9,7 @@ Rectangle {
 
     readonly property var tabs: [
         { id: "weather", icon: "partly_cloudy_day", label: "Weather" },
-        { id: "info", icon: "person", label: "Info" },
-        { id: "drawer", icon: "apps", label: "Drawer" }
+        { id: "info", icon: "person", label: "Info" }
     ]
     readonly property int current: Math.max(0, tabs.findIndex(t => t.id === DashboardState.view))
     readonly property real pad: Tokens.space.xs

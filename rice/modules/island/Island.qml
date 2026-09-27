@@ -142,7 +142,7 @@ PanelWindow {
             cursorShape: Qt.PointingHandCursor
             onClicked: m => {
                 if (m.button === Qt.MiddleButton) Media.active?.togglePlaying();
-                else if (m.button === Qt.RightButton && root.mode === "timer") Timers.pomodoroRunning ? Timers.pause() : Timers.pauseStopwatch();
+                else if (m.button === Qt.RightButton && root.mode === "timer") Timers.pause();
                 else IslandState.open(root.mode === "media" ? "media" : "focus");
             }
             onWheel: w => {

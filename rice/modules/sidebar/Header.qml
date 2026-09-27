@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Widgets
 import qs.config
 import qs.components
 import qs.services
@@ -11,17 +12,35 @@ RowLayout {
 
     readonly property string user: Quickshell.env("USER") || "user"
 
-    Rectangle {
+    // Profile picture (~/.face, see services/Avatar); the initial until one
+    // is set. Click to choose a picture.
+    ClippingRectangle {
+        id: face
         implicitWidth: 48
         implicitHeight: 48
-        radius: Tokens.radius.l
+        radius: height / 2
         color: Theme.tertiaryContainer
         StyledText {
             anchors.centerIn: parent
-            text: parent.parent.user.charAt(0).toUpperCase()
+            visible: faceImage.status !== Image.Ready
+            text: face.parent.user.charAt(0).toUpperCase()
             font.pixelSize: Tokens.font.xxl
             font.weight: Font.Bold
             color: Theme.tertiaryContainerFg
+        }
+        Image {
+            id: faceImage
+            anchors.fill: parent
+            source: Avatar.source
+            cache: false
+            fillMode: Image.PreserveAspectCrop
+            sourceSize.width: 96
+            asynchronous: true
+        }
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: Avatar.pick()
         }
     }
 

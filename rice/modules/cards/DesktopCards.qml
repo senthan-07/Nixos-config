@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.services
 import Quickshell.Io
 import Quickshell.Hyprland
 import qs.components
@@ -32,9 +33,23 @@ Singleton {
         return Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "";
     }
 
+    // Edit mode happens on the desktop layer (below windows), so jump to an
+    // empty workspace while editing and come back when done.
+    property string returnWorkspace: ""
+
     function setEditing(on) {
+        if (on === editing) return;
         if (on && !enabled) store.set("enabled", true);
-        if (on) editScreen = focusedScreen();
+        if (on) {
+            editScreen = focusedScreen();
+            const ws = Hyprland.focusedMonitor?.activeWorkspace;
+            const hasWindows = (ws?.toplevels?.values?.length ?? 0) > 0;
+            returnWorkspace = hasWindows ? String(ws.id) : "";
+            if (hasWindows) Hypr.focusWorkspace("empty");
+        } else if (returnWorkspace !== "") {
+            Hypr.focusWorkspace(returnWorkspace);
+            returnWorkspace = "";
+        }
         editing = on;
     }
 

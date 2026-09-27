@@ -18,6 +18,7 @@ var cards = [
     { type: "storage",  name: "Storage",       icon: "hard_drive",      w: 4, h: 2, min: [3, 2], max: [8, 5] },
     { type: "battery",  name: "Battery",       icon: "battery_full",    w: 2, h: 3, min: [1, 2], max: [3, 4] },
     { type: "calendar", name: "Calendar",      icon: "calendar_month",  w: 3, h: 3, min: [3, 3], max: [5, 5] },
+    { type: "cava",     name: "Visualizer",    icon: "graphic_eq",      w: 4, h: 2, min: [2, 1], max: [8, 4] },
     { type: "todo",     name: "To-do",         icon: "checklist",       w: 3, h: 4, min: [3, 3], max: [5, 8] }
 ];
 

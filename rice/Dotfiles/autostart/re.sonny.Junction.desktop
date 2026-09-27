@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Junction
+X-XDP-Autostart=re.sonny.Junction
+Exec=junction --gapplication-service

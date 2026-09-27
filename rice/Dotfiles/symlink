@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+set -e  # Exit on error
+
+# Always link from the directory this script lives in, wherever it is run from.
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_DIR="$HOME/.config"
+
+mkdir -p "$CONFIG_DIR"
+
+valid_names=()
+
+for item in "$DOTFILES_DIR"/*; do
+    name=$(basename "$item")
+
+    # Skip unwanted files
+    [[ "$name" == ".git" || "$name" == ".vscode" || "$name" == "README.md" || "$name" == "symlink" ]] && continue
+
+    valid_names+=("$name")
+
+    target="$CONFIG_DIR/$name"
+
+    if [ -L "$target" ] && [ "$(readlink "$target")" == "$item" ]; then
+        echo "Already linked: $name"
+        continue
+    fi
+
+    if [ -L "$target" ]; then
+        # Symlink pointing somewhere else (e.g. an old Dotfiles location).
+        echo "Replacing old link: $target -> $(readlink "$target")"
+        rm "$target"
+    elif [ -e "$target" ]; then
+        # A real file or directory is in the way. `ln -s` would otherwise
+        # create the link *inside* a directory, so move it aside first.
+        backup="$target.backup-$(date +%Y%m%d-%H%M%S)"
+        echo "Backing up existing $target -> $backup"
+        mv "$target" "$backup"
+    fi
+
+    echo "Linking $item -> $target"
+    ln -sn "$item" "$target"
+done
+
+# Clean: remove links into this Dotfiles directory whose source is gone.
+# Symlinks that point anywhere else are left alone.
+
+for target in "$CONFIG_DIR"/*; do
+    [ -L "$target" ] || continue
+    name=$(basename "$target")
+    dest=$(readlink "$target")
+
+    [[ "$dest" == "$DOTFILES_DIR"/* ]] || continue
+
+    found=false
+    for valid in "${valid_names[@]}"; do
+        if [ "$name" == "$valid" ]; then
+            found=true
+            break
+        fi
+    done
+
+    if [ "$found" = false ]; then
+        echo "Removing stale symlink: $target"
+        rm "$target"
+    fi
+done
+
+echo "Done!"

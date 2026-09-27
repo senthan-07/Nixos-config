@@ -43,7 +43,7 @@ FloatingWindow {
     minimumSize: Qt.size(760, 480)
     color: Theme.surface
 
-    onVisibleChanged: if (!visible) Panels.settings = false
+    onVisibleChanged: if (!visible) { Panels.settings = false; Avatar.picking = false; }
 
     RowLayout {
         anchors.fill: parent
@@ -126,4 +126,7 @@ FloatingWindow {
             asynchronous: false
         }
     }
+
+    // Profile picture picker (Avatar.pick()), over everything.
+    AvatarPicker { anchors.fill: parent }
 }

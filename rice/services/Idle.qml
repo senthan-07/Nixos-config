@@ -53,6 +53,7 @@ Singleton {
     }
 
     function lockNow() {
+        console.info("rice idle: locking");
         if (Panels.locked) return;
         Panels.closeAll();
         Panels.locked = true;
@@ -71,8 +72,20 @@ Singleton {
         Quickshell.execDetached(["systemctl", "suspend"]);
     }
 
+    // Quickshell applies an IdleMonitor's timeout when it starts watching, so a
+    // changed timeout only takes effect after re-arming: briefly disable all
+    // monitors whenever any timing changes.
+    property bool rearming: false
+    function rearm() {
+        rearming = true;
+        Qt.callLater(() => rearming = false);
+    }
+    onLockAfterChanged: rearm()
+    onScreenOffAfterChanged: rearm()
+    onSuspendAfterChanged: rearm()
+
     function monitorOn(seconds) {
-        return root.enabled && !root.paused && seconds > 0;
+        return root.enabled && !root.paused && !root.rearming && seconds > 0;
     }
 
     JsonStore {
@@ -93,7 +106,10 @@ Singleton {
         enabled: root.monitorOn(root.screenOffAfter)
         timeout: Math.max(1, root.screenOffAfter)
         respectInhibitors: true
-        onIsIdleChanged: root.setDpms(!isIdle)
+        onIsIdleChanged: {
+            console.info(`rice idle: screen ${isIdle ? "off" : "on"}`);
+            root.setDpms(!isIdle);
+        }
     }
 
     IdleMonitor {
@@ -104,6 +120,7 @@ Singleton {
         onIsIdleChanged: {
             if (!isIdle) return;
             // Lock first so the machine never wakes up unlocked.
+            console.info("rice idle: suspending");
             root.lockNow();
             root.suspendNow();
         }

@@ -5,8 +5,7 @@ import qs.components
 import "CardCatalog.js" as Catalog
 
 // One card on a DesktopCanvas. Outside edit mode it is just the card; in
-// edit mode an overlay takes the pointer: drag to move, drag the corner
-// handle to resize, × to remove. Geometry commits go through the canvas,
+// edit mode an overlay takes the pointer: drag to move, × to remove. Geometry commits go through the canvas,
 // which validates them against the grid.
 Item {
     id: card
@@ -114,7 +113,6 @@ Item {
                 property point grab
 
                 onPressed: m => {
-                    console.log(`CARDDBG press ${card.cardId}`);
                     card.canvas.select(card.cardId);
                     const p = mapToItem(card.canvas.contentItem, m.x, m.y);
                     grab = Qt.point(p.x - card.homeX, p.y - card.homeY);
@@ -130,10 +128,9 @@ Item {
                     card.dragX = Math.max(0, Math.min(W - card.width, p.x - grab.x));
                     card.dragY = Math.max(0, Math.min(H - card.height, p.y - grab.y));
                     card.canvas.preview(card.cardId, card.canvas.cellX(card.dragX), card.canvas.cellY(card.dragY), card.gw, card.gh);
-                    console.log(`CARDDBG move ${card.cardId} ${Math.round(card.dragX)},${Math.round(card.dragY)}`);
                 }
-                onReleased: { console.log(`CARDDBG release ${card.cardId}`); finish(true); }
-                onCanceled: { console.log(`CARDDBG CANCEL ${card.cardId}`); finish(false); }
+                onReleased: finish(true)
+                onCanceled: finish(false)
 
                 function finish(commit) {
                     if (!card.dragging) return;
@@ -145,11 +142,12 @@ Item {
                 }
             }
 
-            // Name chip.
+            // Name chip, sitting on the top edge so it doesn't cover the card.
             Rectangle {
                 anchors.left: parent.left
                 anchors.top: parent.top
-                anchors.margins: Tokens.space.s
+                anchors.leftMargin: Tokens.space.l
+                anchors.topMargin: -height / 2
                 visible: card.selected || move.containsMouse
                 implicitWidth: nameRow.implicitWidth + Tokens.space.m * 2
                 implicitHeight: 26
@@ -161,7 +159,7 @@ Item {
                     spacing: Tokens.space.xs
                     Icon { text: card.def ? card.def.icon : "widgets"; size: 14; fill: 1; color: Theme.primaryFg }
                     StyledText {
-                        text: `${card.def ? card.def.name : card.type}  ${card.resizing && card.canvas.previewRect ? card.canvas.previewRect.w : card.gw}×${card.resizing && card.canvas.previewRect ? card.canvas.previewRect.h : card.gh}`
+                        text: card.def ? card.def.name : card.type
                         color: Theme.primaryFg
                         font.pixelSize: Tokens.font.xs
                         font.weight: Font.Bold
@@ -183,65 +181,6 @@ Item {
                 Icon { anchors.centerIn: parent; text: "close"; size: 18; color: Theme.errorFg }
             }
 
-            // Resize handle.
-            Surface {
-                id: handle
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.rightMargin: -10
-                anchors.bottomMargin: -10
-                width: 30; height: 30; radius: 15
-                base: Theme.primary
-                content: Theme.primaryFg
-                Icon { anchors.centerIn: parent; text: "open_in_full"; rotation: 90; size: 16; color: Theme.primaryFg }
-
-                MouseArea {
-                    anchors.fill: parent
-                    anchors.margins: -6
-                    hoverEnabled: true
-                    preventStealing: true
-                    cursorShape: Qt.SizeFDiagCursor
-                    property point start
-                    property size startSize
-
-                    onPressed: m => {
-                        card.canvas.select(card.cardId);
-                        start = mapToItem(card.canvas.contentItem, m.x, m.y);
-                        startSize = Qt.size(card.width, card.height);
-                        card.glide = false;
-                        card.liveW = card.width;
-                        card.liveH = card.height;
-                        card.resizing = true;
-                    }
-                    onPositionChanged: m => {
-                        if (!card.resizing) return;
-                        const p = mapToItem(card.canvas.contentItem, m.x, m.y);
-                        const d = card.def || { min: [1, 1], max: [12, 12] };
-                        const minW = CardStyle.span(d.min[0]), minH = CardStyle.span(d.min[1]);
-                        const maxW = CardStyle.span(d.max[0]), maxH = CardStyle.span(d.max[1]);
-                        let w = Math.max(minW, Math.min(maxW, startSize.width + p.x - start.x));
-                        let h = Math.max(minH, Math.min(maxH, startSize.height + p.y - start.y));
-                        if (d.square) { w = h = Math.max(w, h); }
-                        card.liveW = w;
-                        card.liveH = h;
-                        let cw = Math.round((w + CardStyle.gap) / CardStyle.pitch);
-                        let ch = Math.round((h + CardStyle.gap) / CardStyle.pitch);
-                        if (d.square) cw = ch = Math.max(cw, ch);
-                        card.canvas.preview(card.cardId, card.gx, card.gy, cw, ch);
-                    }
-                    onReleased: finish(true)
-                    onCanceled: finish(false)
-
-                    function finish(commit) {
-                        if (!card.resizing) return;
-                        const r = card.canvas.previewRect;
-                        card.glide = true;
-                        if (commit && r) card.canvas.commit(card.cardId, { x: card.gx, y: card.gy, w: r.w, h: r.h }, 0);
-                        card.canvas.clearPreview();
-                        card.resizing = false;
-                    }
-                }
-            }
         }
     }
 }

@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.config
 import qs.components
+import qs.services
 import "CardCatalog.js" as Catalog
 
 // Desktop widget layer for one screen: sits above the wallpaper and below
@@ -13,7 +14,7 @@ import "CardCatalog.js" as Catalog
 // can be edited over windows, shows the grid and an add/reset/done toolbar.
 //
 // Keyboard in edit mode: Tab / Shift+Tab select a card, arrows move it,
-// Shift+arrows resize, Delete removes, A opens the card picker, Esc finishes.
+// Delete removes, A opens the card picker, Esc finishes.
 //
 //   DesktopCanvas { screen: modelData }
 PanelWindow {
@@ -25,7 +26,7 @@ PanelWindow {
 
     // Pause card animations while windows cover this output's desktop.
     readonly property bool desktopVisible: {
-        const mon = Hyprland.monitorFor(screen);
+        const mon = HyprMonitors.forScreen(screen);
         const ws = mon ? mon.activeWorkspace : null;
         if (!ws) return true;
         if (ws.hasFullscreen) return false;
@@ -59,11 +60,14 @@ PanelWindow {
     color: "transparent"
     visible: DesktopCards.enabled
     WlrLayershell.namespace: "rice-desktop"
-    WlrLayershell.layer: editing ? WlrLayer.Top : WlrLayer.Bottom
+    // Always below windows: Hyprland delivered no pointer input to the Top /
+    // Overlay surfaces edit mode used before. Edit mode instead switches to an
+    // empty workspace (DesktopCards.setEditing) so nothing covers the widgets.
+    WlrLayershell.layer: WlrLayer.Bottom
     // Keyboard for edit mode goes to the toolbar window below (a surface
     // mapped with exclusive focus); the canvas only takes clicks-to-focus
     // for cards with inputs (to-do).
-    WlrLayershell.keyboardFocus: editing ? WlrKeyboardFocus.None : WlrKeyboardFocus.OnDemand
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     // Outside edit mode only the cards take input; the rest clicks through.
     // In edit mode the whole surface takes input. Use an explicit full region:
@@ -252,27 +256,13 @@ PanelWindow {
         DesktopCard { canvas: root }
     }
 
-    // Edit toolbar, card picker and keyboard handling live in their own
-    // overlay surface that exists only while editing, so it is mapped with
-    // exclusive keyboard focus from the start.
-    LazyLoader {
+    // Edit toolbar, card picker and keyboard handling, drawn on this surface.
+    Loader {
+        anchors.fill: parent
+        z: 20
         active: root.editing
-
-        PanelWindow {
+        sourceComponent: Item {
             id: editBar
-            screen: root.screen
-            anchors.top: true
-            implicitWidth: Math.min(root.width, 640)
-            implicitHeight: 52 + Tokens.space.l + Tokens.space.s + picker.implicitHeight + Tokens.space.l
-            exclusionMode: ExclusionMode.Normal
-            color: "transparent"
-            WlrLayershell.namespace: "rice-desktop-edit"
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: root.keyScreen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-            mask: Region {
-                item: toolbar
-                Region { item: root.pickerOpen ? picker : null }
-            }
 
             Item {
                 id: keys
@@ -291,10 +281,10 @@ PanelWindow {
                         break;
                     case Qt.Key_Tab: root.cycle(1); break;
                     case Qt.Key_Backtab: root.cycle(-1); break;
-                    case Qt.Key_Left: root.nudge(-1, 0, shift); break;
-                    case Qt.Key_Right: root.nudge(1, 0, shift); break;
-                    case Qt.Key_Up: root.nudge(0, -1, shift); break;
-                    case Qt.Key_Down: root.nudge(0, 1, shift); break;
+                    case Qt.Key_Left: root.nudge(-1, 0, false); break;
+                    case Qt.Key_Right: root.nudge(1, 0, false); break;
+                    case Qt.Key_Up: root.nudge(0, -1, false); break;
+                    case Qt.Key_Down: root.nudge(0, 1, false); break;
                     case Qt.Key_Delete:
                     case Qt.Key_Backspace:
                         if (root.selectedId) root.removeCard(root.selectedId);
@@ -341,7 +331,7 @@ PanelWindow {
                         spacing: -2
                         StyledText { text: "Edit desktop"; font.weight: Font.Bold }
                         StyledText {
-                            text: "Drag to move · corner to resize · Tab / arrows / Del"
+                            text: "Drag to move · × to remove · Tab / arrows / Del"
                             color: Theme.surfaceVariantFg
                             font.pixelSize: Tokens.font.xs
                         }

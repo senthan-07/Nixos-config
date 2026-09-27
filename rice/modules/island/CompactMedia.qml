@@ -59,26 +59,26 @@ Item {
             }
         }
 
-        // Running pomodoro / stopwatch chip
+        // Running pomodoro chip
         Rectangle {
             visible: IslandState.timerActive
             implicitHeight: 22
             implicitWidth: chipRow.implicitWidth + Tokens.space.m
             radius: 11
-            color: Theme.alpha(Timers.pomodoroRunning ? (Timers.pomodoroPhase === "focus" ? Theme.primary : Theme.tertiary) : Theme.secondary, 0.18)
+            color: Theme.alpha(Timers.pomodoroPhase === "focus" ? Theme.primary : Theme.tertiary, 0.18)
             Row {
                 id: chipRow
                 anchors.centerIn: parent
                 spacing: 3
                 Icon {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Timers.pomodoroRunning ? (Timers.pomodoroPhase === "focus" ? "target" : "local_cafe") : "timer"
+                    text: Timers.pomodoroPhase === "focus" ? "target" : "local_cafe"
                     size: 13
                     fill: 1
                 }
                 StyledText {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Timers.pomodoroRunning ? Timers.fmt(Timers.pomodoroRemaining) : Timers.fmt(Timers.stopwatchElapsed)
+                    text: Timers.fmt(Timers.pomodoroRemaining)
                     font.pixelSize: Tokens.font.xs
                     font.features: { "tnum": 1 }
                     font.weight: Font.DemiBold

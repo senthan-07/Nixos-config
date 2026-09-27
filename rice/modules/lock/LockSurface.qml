@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Widgets
 import Quickshell.Services.UPower
 import qs.config
 import qs.components
@@ -77,18 +78,37 @@ WlSessionLockSurface {
             anchors.bottomMargin: parent.height * 0.16
             spacing: Tokens.space.l
 
+            // Profile picture (~/.face via services/Avatar), or the initial.
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
-                implicitWidth: 72
-                implicitHeight: 72
-                radius: Tokens.radius.xl
-                color: Theme.primaryContainer
-                StyledText {
+                Layout.bottomMargin: 200
+                implicitWidth: 208
+                implicitHeight: 208
+                radius: width / 2
+                color: Theme.alpha(Theme.primary, 0.35)
+
+                ClippingRectangle {
                     anchors.centerIn: parent
-                    text: (Quickshell.env("USER") || "?").charAt(0).toUpperCase()
-                    font.pixelSize: 32
-                    font.weight: Font.Bold
-                    color: Theme.primaryContainerFg
+                    width: parent.width - 8
+                    height: width
+                    radius: width / 2
+                    color: Theme.primaryContainer
+                    StyledText {
+                        anchors.centerIn: parent
+                        visible: lockFace.status !== Image.Ready
+                        text: (Quickshell.env("USER") || "?").charAt(0).toUpperCase()
+                        font.pixelSize: 40
+                        font.weight: Font.Bold
+                        color: Theme.primaryContainerFg
+                    }
+                    Image {
+                        id: lockFace
+                        anchors.fill: parent
+                        source: Avatar.source
+                        fillMode: Image.PreserveAspectCrop
+                        sourceSize.width: 208
+                        asynchronous: true
+                    }
                 }
             }
 

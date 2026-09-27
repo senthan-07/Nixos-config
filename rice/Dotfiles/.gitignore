@@ -1,0 +1,15 @@
+# Written by rice (matugen) on every wallpaper change; regenerate instead of committing.
+kitty/light-theme.auto.conf
+kitty/no-preference-theme.auto.conf
+kitty/*.pre-rice
+gtk-3.0/rice-colors.css
+gtk-3.0/settings.ini
+gtk-4.0/rice-colors.css
+qt5ct/colors/
+qt6ct/colors/
+btop/themes/rice.theme
+cava/themes/rice
+foot/rice-colors.ini
+fuzzel/rice-colors.ini
+hypr/Rice/wallpaper-colors.lua
+*.rice-tmp

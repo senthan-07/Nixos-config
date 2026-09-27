@@ -124,10 +124,35 @@ SettingsPage {
                 }
             }
 
-            // Timeline track with a marker for each step.
+            // Timeline track with one marker per distinct time. Steps at the same
+            // time share a marker; nearby markers alternate label rows.
             Item {
+                id: timeline
+                readonly property var groups: {
+                    const steps = [
+                        { at: page.lockAfter, icon: "lock", label: "Lock" },
+                        { at: page.screenOffAfter, icon: "desktop_access_disabled", label: "Screen off" },
+                        { at: page.suspendAfter, icon: "mode_standby", label: "Suspend" }
+                    ].filter(st => st.at > 0);
+                    const byTime = {};
+                    for (const st of steps) {
+                        if (!byTime[st.at]) byTime[st.at] = { at: st.at, icons: [], labels: [] };
+                        byTime[st.at].icons.push(st.icon);
+                        byTime[st.at].labels.push(st.label);
+                    }
+                    const out = Object.values(byTime).sort((a, b) => a.at - b.at);
+                    // Put a label on the second row when it would collide with the previous one.
+                    let lastX = -1e9, lastRow = 1;
+                    for (const g of out) {
+                        const x = track.width * g.at / summary.span;
+                        g.row = x - lastX < 150 && lastRow === 0 ? 1 : 0;
+                        lastX = x; lastRow = g.row;
+                    }
+                    return out;
+                }
+
                 Layout.fillWidth: true
-                implicitHeight: 44
+                implicitHeight: groups.some(g => g.row === 1) ? 60 : 44
                 opacity: page.active ? 1 : 0.45
                 Behavior on opacity { Anim {} }
 
@@ -142,30 +167,38 @@ SettingsPage {
                 }
 
                 Repeater {
-                    model: [
-                        { at: page.lockAfter, icon: "lock", label: "Lock" },
-                        { at: page.screenOffAfter, icon: "desktop_access_disabled", label: "Screen off" },
-                        { at: page.suspendAfter, icon: "mode_standby", label: "Suspend" }
-                    ].filter(s => s.at > 0)
+                    model: timeline.groups
 
                     Item {
+                        id: mark
                         required property var modelData
+                        readonly property string text: modelData.labels.join(" + ") + " · " + page.fmt(modelData.at)
+                        width: Math.max(84, labelText.implicitWidth + 8)
                         x: Math.min(track.width - width, Math.max(0, track.width * modelData.at / summary.span - width / 2))
-                        width: 84
                         height: parent.height
                         Behavior on x { Anim { easing.bezierCurve: Motion.curve.emphasizedDecel } }
 
-                        Rectangle {
+                        Row {
                             anchors.horizontalCenter: parent.horizontalCenter
                             y: 0
-                            width: 18; height: 18; radius: 9
-                            color: summary.fg
-                            Icon { anchors.centerIn: parent; text: modelData.icon; size: 12; fill: 1; color: summary.color }
+                            spacing: -4
+                            Repeater {
+                                model: mark.modelData.icons
+                                Rectangle {
+                                    required property string modelData
+                                    width: 18; height: 18; radius: 9
+                                    color: summary.fg
+                                    border.width: 1
+                                    border.color: summary.color
+                                    Icon { anchors.centerIn: parent; text: parent.modelData; size: 12; fill: 1; color: summary.color }
+                                }
+                            }
                         }
                         StyledText {
+                            id: labelText
                             anchors.horizontalCenter: parent.horizontalCenter
-                            y: 22
-                            text: modelData.label + " · " + page.fmt(modelData.at)
+                            y: mark.modelData.row === 1 ? 38 : 22
+                            text: mark.text
                             color: summary.fg
                             font.pixelSize: Tokens.font.xs
                             font.weight: Font.Medium

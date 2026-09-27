@@ -46,6 +46,13 @@
     nerd-fonts.jetbrains-mono
   ];
 
+  fonts.fontconfig.defaultFonts = {
+    sansSerif = [ "JetBrainsMono Nerd Font Mono" ];
+    serif     = [ "JetBrainsMono Nerd Font Mono" ];
+    monospace = [ "JetBrainsMono Nerd Font Mono" ];
+  };
+
+
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
@@ -145,7 +152,7 @@
   environment.systemPackages = with pkgs; [
     vim wget git efibootmgr fastfetch lm_sensors nvtopPackages.full
     btop mokutil tree wl-clipboard omen-tools python3 tmux openssl
-    sbctl limine-full nix-ld
+    sbctl limine-full nix-ld ddcutil
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -189,6 +196,7 @@
   # and migrated your data accordingly.
   
   boot.tmp.cleanOnBoot = true;
+  boot.kernelModules = [ "i2c-dev" ];
   
   nix.gc = {
   automatic = true;

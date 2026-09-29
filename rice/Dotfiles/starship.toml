@@ -1,45 +1,148 @@
+# ============================================================
+# STARSHIP — NixOS / Hyprland Rice
+# ============================================================
 
-add_newline = true
+add_newline = false
 command_timeout = 300
 
-# ===== PROMPT FORMAT =====
-format = "$username@$hostname $directory $python $character"
+format = """
+[╭─](bold cyan) $username[@](bold bright-black)$hostname [](bold cyan) $directory$git_branch$git_status
+[╰─](bold cyan) $character """
 
-# Keep the prompt on a clean line
-[line_break]
-disabled = false
+right_format = "$cmd_duration$battery$time"
 
-# ===== USER =====
+
+# ============================================================
+# USER
+# ============================================================
+
 [username]
 show_always = true
 style_user = "bold green"
 style_root = "bold red"
 format = "[$user]($style)"
 
-# ===== HOST =====
+
+# ============================================================
+# HOST
+# ============================================================
+
 [hostname]
 ssh_only = false
 trim_at = "."
 style = "bold yellow"
 format = "[$hostname]($style)"
 
-# ===== DIRECTORY =====
+
+# ============================================================
+# DIRECTORY
+# ============================================================
+
 [directory]
-truncation_length = 0
-style = "bold cyan"
-format = "[$path]($style)"
-
-# ===== PYTHON ENV =====
-[python]
-symbol = " "
+truncation_length = 3
+truncate_to_repo = true
 style = "bold blue"
-format = "[$symbol${pyenv_prefix}(${version}) ($virtualenv)]($style)"
+format = "[ 📁 $path ]($style)"
 
-# ===== PROMPT SYMBOL =====
-[character]
-success_symbol = "[➜](bold green)"
-error_symbol = "[✗](bold red)"
 
-# ===== COMMAND DURATION =====
+# ============================================================
+# GIT BRANCH
+# ============================================================
+
+[git_branch]
+symbol = " "
+style = "bold magenta"
+format = "[ $symbol$branch ]($style)"
+
+
+# ============================================================
+# GIT STATUS
+# ============================================================
+
+[git_status]
+style = "bold red"
+format = "[ $all_status$ahead_behind ]($style) "
+
+stashed = "⇩${count}"
+untracked = "?${count}"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+
+
+# ============================================================
+# PYTHON
+# ============================================================
+
+[python]
+symbol = " "
+style = "bold yellow"
+format = "[ $symbol${pyenv_prefix}(${version}) ($virtualenv) ]($style)"
+
+
+# ============================================================
+# BATTERY
+# ============================================================
+
+[battery]
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰁿 "
+empty_symbol = "󰂎 "
+unknown_symbol = "󰂑 "
+
+format = "[$symbol$percentage]($style) "
+
+[[battery.display]]
+threshold = 20
+style = "bold red"
+
+[[battery.display]]
+threshold = 50
+style = "bold yellow"
+
+[[battery.display]]
+threshold = 100
+style = "bold green"
+
+
+# ============================================================
+# TIME
+# ============================================================
+
+[time]
+disabled = false
+format = "[󰥔 $time]($style)"
+time_format = "%H:%M"
+style = "bold cyan"
+
+
+# ============================================================
+# COMMAND DURATION
+# ============================================================
+
 [cmd_duration]
-disabled = true
+min_time = 2000
+format = "[󱎫 $duration]($style) "
+style = "bold yellow"
+
+
+# ============================================================
+# COMMAND STATUS
+# ============================================================
+
+[status]
+disabled = false
+format = "[✗ $status]($style) "
+style = "bold red"
+
+
+# ============================================================
+# PROMPT
+# ============================================================
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vicmd_symbol = "[❮](bold yellow)"

@@ -196,6 +196,11 @@
   # and migrated your data accordingly.
   
   boot.tmp.cleanOnBoot = true;
+
+  services.udev.extraRules = ''
+  SUBSYSTEM=="i2c", MODE="0660", GROUP="video"
+  '';
+  
   boot.kernelModules = [ "i2c-dev" ];
   
   nix.gc = {

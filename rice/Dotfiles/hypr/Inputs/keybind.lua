@@ -52,6 +52,21 @@ hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_S
 hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
 
+-- External monitor brightness via DDC/CI
+-- SHIFT + Brightness Up/Down
+
+hl.bind(
+    "SHIFT + XF86MonBrightnessUp",
+    hl.dsp.exec_cmd("ddcutil setvcp 10 + 5"),
+    { locked = true }
+)
+
+hl.bind(
+    "SHIFT + XF86MonBrightnessDown",
+    hl.dsp.exec_cmd("ddcutil setvcp 10 - 5"),
+    { locked = true }
+)
+
 -- Requires playerctl
 hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })

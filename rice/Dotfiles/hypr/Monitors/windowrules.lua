@@ -75,3 +75,19 @@ hl.window_rule({
     float  = true,
     center = true,
 })
+
+hl.window_rule({
+    name  = "pavucontrol",
+    match = { class = "^org\\.pulseaudio\\.pavucontrol$" },
+
+    float  = true,
+    center = true,
+})
+
+hl.window_rule({
+    name  = "camera-snapshot",
+    match = { class = "^org\\.gnome\\.Snapshot$" },
+
+    float  = true,
+    center = true,
+})

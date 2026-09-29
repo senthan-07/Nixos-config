@@ -44,4 +44,14 @@
     };
     efi.canTouchEfiVariables = true;
   };
+
+  # Catppuccin colours for the Limine menu (catppuccin/nix flake input).
+  # `enable` turns the module on; `autoEnable = false` stops it from also
+  # theming everything else (cursors, GTK icons, TTY…), which rice/matugen and
+  # Bibata already handle. Flavour defaults to mocha: catppuccin.flavor/accent.
+  catppuccin = {
+    enable = true;
+    autoEnable = false;
+    limine.enable = true;
+  };
 }

@@ -4,13 +4,19 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    # Catppuccin themes as NixOS options (used for the Limine boot menu).
+    catppuccin = {
+      url = "github:catppuccin/nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     linux-omen-module = {
       url = "github:Sharwesh05/linux-omen-module/a6d5de8ce5b6ada973b8527eed5041f779b7b306";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, linux-omen-module, ... }:
+  outputs = { self, nixpkgs, catppuccin, linux-omen-module, ... }:
     let
       system = "x86_64-linux";
 
@@ -71,6 +77,7 @@
 
           modules = [
             ./configuration.nix
+            catppuccin.nixosModules.catppuccin
 
             {
               nixpkgs.overlays = [

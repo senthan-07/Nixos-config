@@ -14,6 +14,10 @@ QtObject {
     required property string name
     property var data: ({})
     readonly property bool loaded: file.loaded
+    // True once `data` holds the file's contents (or the file turned out not to
+    // exist). FileView.loaded flips before onLoaded runs, so use this to wait
+    // for real values instead of the defaults.
+    property bool ready: false
 
     function get(key, fallback) {
         return data[key] !== undefined ? data[key] : fallback;
@@ -41,6 +45,8 @@ QtObject {
             } catch (e) {
                 root.data = {};
             }
+            root.ready = true;
         }
+        onLoadFailed: root.ready = true
     }
 }

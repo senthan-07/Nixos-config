@@ -15,7 +15,8 @@ Item {
     property var items: []
     property int selected: 0
     property var info: null               // StateView info when there is nothing to show
-    property var hints: []                // [[keys, label]]
+    property var hints: []                // [[keys, label, [key, modifiers]?]]
+    signal hintActivated(var spec)        // a hint with a key spec was clicked
     property string status: ""            // right side of the footer
     property var preview: null            // { glyph, title } footer preview (emoji)
     property string confirmKey: ""
@@ -197,10 +198,30 @@ Item {
 
                 Repeater {
                     model: root.preview ? [] : root.hints
-                    KeyHint {
+                    // KeyHint lays out its own children, so the click area
+                    // sits beside it in a wrapper instead of inside it.
+                    Item {
+                        id: hint
                         required property var modelData
-                        keys: modelData[0]
-                        label: modelData[1]
+                        implicitWidth: hintBody.implicitWidth
+                        implicitHeight: hintBody.implicitHeight
+                        KeyHint {
+                            id: hintBody
+                            anchors.verticalCenter: parent.verticalCenter
+                            // The armed "clear all" hint is red.
+                            fg: hint.modelData[1].startsWith("Press again") ? Theme.error : Theme.surfaceVariantFg
+                            keys: hint.modelData[0]
+                            label: hint.modelData[1]
+                            opacity: hintMouse.containsMouse ? 0.75 : 1
+                        }
+                        MouseArea {
+                            id: hintMouse
+                            anchors.fill: parent
+                            visible: !!hint.modelData[2]
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.hintActivated(hint.modelData[2])
+                        }
                     }
                 }
 

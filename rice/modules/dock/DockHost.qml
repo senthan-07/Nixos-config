@@ -6,7 +6,7 @@ import qs.services
 //   shell.qml:  import qs.modules.dock   …   DockHost {}
 Scope {
     Variants {
-        model: Dock.enabled ? Quickshell.screens : []
+        model: Dock.ready && Dock.enabled ? Quickshell.screens : []
 
         DockWindow {
             required property ShellScreen modelData

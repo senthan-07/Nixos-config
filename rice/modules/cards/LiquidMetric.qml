@@ -14,7 +14,7 @@ Item {
     property bool running: true
     property bool elevated: true
 
-    readonly property MetricInfo info: MetricInfo { metric: root.metric }
+    readonly property MetricInfo info: MetricInfo { metric: root.metric; live: root.running }
 
     implicitWidth: 140
     implicitHeight: 140

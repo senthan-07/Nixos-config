@@ -171,6 +171,16 @@ PanelWindow {
     }
 
     Timer { id: hideTimer; interval: 600; onTriggered: win.revealed = false }
+
+    // Startup: at login Hyprland reports monitors and window geometry a moment
+    // after the dock is created, so the first hide decision can flip. Stay
+    // invisible (and don't animate) until that has settled, then fade in
+    // already in the right state.
+    property bool settled: false
+    readonly property bool canSettle: !Dock.autohide || !Dock.smartHide || hyprland
+    onCanSettleChanged: if (canSettle && !settled) { Hyprland.refreshToplevels(); settleTimer.restart(); }
+    Component.onCompleted: if (canSettle) { Hyprland.refreshToplevels(); settleTimer.restart(); }
+    Timer { id: settleTimer; interval: 700; onTriggered: win.settled = true }
     Timer { id: revealTimer; interval: 140; onTriggered: { win.revealed = true; hideTimer.restart(); } }
 
     // Keep Hyprland window geometry fresh for the overlap test. Events cover
@@ -414,9 +424,12 @@ PanelWindow {
     Item {
         id: stage
         anchors.fill: parent
-        opacity: 1 - hideShift.progress * 0.6
+        // `appear` fades the dock in once startup has settled.
+        property real appear: win.settled ? 1 : 0
+        Behavior on appear { Anim { duration: Motion.duration.medium } }
+        opacity: (1 - hideShift.progress * 0.6) * appear
         transform: Translate { id: hideShift; property real progress: win.hidden ? 1 : 0; y: progress * (win.restHeight + win.margin + 24)
-            Behavior on progress { Anim { duration: Motion.duration.medium; easing.bezierCurve: win.hidden ? Motion.curve.emphasizedAccel : Motion.curve.emphasizedDecel } }
+            Behavior on progress { enabled: win.settled; Anim { duration: Motion.duration.medium; easing.bezierCurve: win.hidden ? Motion.curve.emphasizedAccel : Motion.curve.emphasizedDecel } }
         }
 
         HoverHandler {

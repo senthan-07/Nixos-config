@@ -309,10 +309,50 @@ Item {
                     Item { Layout.fillWidth: true }
 
                     StyledText {
-                        visible: !!preview.payload && !!preview.payload.truncated
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: implicitWidth
+                        visible: !!preview.payload && !!preview.payload.truncated && !clearAll.armed
                         text: "Preview truncated · Copy restores everything"
                         font.pixelSize: Tokens.font.s
                         color: Theme.surfaceVariantFg
+                        elide: Text.ElideRight
+                    }
+
+                    // Clear the whole history. The first click arms it (turns
+                    // red for 3 s), the second one wipes.
+                    Surface {
+                        id: clearAll
+                        property bool armed: false
+                        implicitHeight: 38
+                        implicitWidth: clearRow.implicitWidth + 28
+                        radius: 19
+                        interactive: true
+                        base: armed ? Theme.error : Theme.alpha(Theme.surface, 0)
+                        content: armed ? Theme.errorFg : Theme.error
+                        border.width: armed ? 0 : 1
+                        border.color: Theme.alpha(Theme.error, 0.5)
+                        onClicked: {
+                            if (armed) {
+                                armed = false;
+                                Clipboard.wipe();
+                            } else {
+                                armed = true;
+                                disarm.restart();
+                            }
+                        }
+                        Timer { id: disarm; interval: 3000; onTriggered: clearAll.armed = false }
+                        Row {
+                            id: clearRow
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Icon { anchors.verticalCenter: parent.verticalCenter; text: "delete_sweep"; size: 18; color: clearAll.content }
+                            StyledText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: clearAll.armed ? `Clear ${Clipboard.entries.length} item${Clipboard.entries.length === 1 ? "" : "s"}?` : "Clear all"
+                                font.weight: Font.DemiBold
+                                color: clearAll.content
+                            }
+                        }
                     }
                 }
             }

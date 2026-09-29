@@ -16,6 +16,9 @@ Singleton {
     id: root
 
     // ---- preferences (persisted in $XDG_STATE_HOME/rice/dock.json) ----
+    // dock.json has been read. Until then every preference is its default
+    // (autohide off), so the dock waits for this instead of showing wrongly.
+    readonly property bool ready: store.ready
     readonly property bool enabled: store.get("enabled", true)
     readonly property bool autohide: store.get("autohide", false)
     // With autohide on: only hide while a window overlaps the dock (Hyprland only).

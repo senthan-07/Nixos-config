@@ -165,9 +165,22 @@ Singleton {
         }
     }
 
+    // GPU cards register while they are on screen and animating; with none
+    // watching (desktop covered by windows) the GPU is not sampled at all and
+    // the nvidia-smi loop is stopped, so the shown value freezes.
+    property var gpuWatchers: ({})
+    readonly property bool gpuWanted: Object.keys(gpuWatchers).length > 0
+    function watchGpu(token, on) {
+        if (!token || !!gpuWatchers[token] === on) return;
+        const next = Object.assign({}, gpuWatchers);
+        if (on) next[token] = true;
+        else delete next[token];
+        gpuWatchers = next;
+    }
+
     property int gpuTick: 0
     function sampleGpu() {
-        if (!gpuAvailable) return;
+        if (!gpuAvailable || !gpuWanted) return;
         gpuTick++;
         if (nvidiaDir) nvPower.reload();
         if (useNvidia) {
@@ -207,7 +220,7 @@ Singleton {
     // loop mode prints a CSV line every 5 seconds while the card is in use.
     Process {
         id: nvSmi
-        running: root.useNvidia
+        running: root.useNvidia && root.gpuWanted
         command: ["nvidia-smi", "--query-gpu=utilization.gpu,temperature.gpu,memory.used,memory.total,name",
             "--format=csv,noheader,nounits", "-lms", "3000"]
         stdout: SplitParser {

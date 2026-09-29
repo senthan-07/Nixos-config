@@ -8,6 +8,14 @@ QtObject {
     id: root
 
     property string metric: "cpu"
+    // While true, a GPU card keeps GPU sampling running (see Metrics.watchGpu);
+    // cards set it from `running`, so covered desktops stop polling the GPU.
+    property bool live: true
+    readonly property string token: `metric-${Math.random().toString(36).slice(2, 8)}`
+    readonly property bool watching: live && metric === "gpu"
+    onWatchingChanged: Metrics.watchGpu(token, watching)
+    Component.onCompleted: Metrics.watchGpu(token, watching)
+    Component.onDestruction: Metrics.watchGpu(token, false)
 
     readonly property bool available: {
         switch (metric) {

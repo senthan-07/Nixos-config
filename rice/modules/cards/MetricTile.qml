@@ -14,7 +14,7 @@ Rectangle {
     property string metric: "cpu"
     property bool running: true
 
-    readonly property MetricInfo info: MetricInfo { metric: root.metric }
+    readonly property MetricInfo info: MetricInfo { metric: root.metric; live: root.running }
     readonly property bool dense: width < 220 || height < 150
     readonly property bool showTrend: info.available && height >= 120
 

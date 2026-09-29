@@ -69,6 +69,8 @@ PanelWindow {
     property int selected: 0
     property string expandedKey: ""
     property string confirmKey: ""
+    // "Clear all" asks for a second press; forget the first one after 3 s.
+    Timer { interval: 3000; running: root.confirmKey === "wipe"; onTriggered: root.confirmKey = "" }
     property string copiedKey: ""
     property bool switching: false
     property string lastQuery: ""
@@ -553,7 +555,11 @@ PanelWindow {
     readonly property var hints: {
         switch (mode) {
         case "files": return [["↵", "Open"], ["Alt ↵", "Show in folder"], ["Ctrl ↵", "Copy path"]];
-        case "clipboard": return [["↵", "Copy"], ["⇧ ↵", "Copy, stay"], ["⇧ Del", "Delete"], ["Ctrl ⇧ Del", "Clear all"]];
+        // A third element makes the hint clickable: [key, modifiers] sent to handleKey.
+        case "clipboard": return [["↵", "Copy", [Qt.Key_Return, 0]], ["⇧ ↵", "Copy, stay", [Qt.Key_Return, Qt.ShiftModifier]],
+            ["⇧ Del", "Delete", [Qt.Key_Delete, Qt.ShiftModifier]],
+            ["Ctrl ⇧ Del", confirmKey === "wipe" ? `Press again to clear ${Clipboard.entries.length} item${Clipboard.entries.length === 1 ? "" : "s"}` : "Clear all",
+                [Qt.Key_Delete, Qt.ControlModifier | Qt.ShiftModifier]]];
         case "wallpapers": return [["↵", "Apply"], ["⇧ ↵", "Preview"], ["← →", "Move"]];
         case "commands": return [["↵", "Run"], ["Esc", "Back"]];
         case "calc": return [["↵", "Copy result"], ["Esc", "Back"]];
@@ -864,6 +870,10 @@ PanelWindow {
             selected: root.selected
             info: root.items.length ? null : root.info
             hints: root.hints
+            onHintActivated: spec => {
+                root.handleKey({ key: spec[0], modifiers: spec[1], accepted: false });
+                bar.input.forceActiveFocus();
+            }
             status: root.status
             confirmKey: root.confirmKey
             copiedKey: root.copiedKey

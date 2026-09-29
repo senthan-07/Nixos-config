@@ -33,4 +33,14 @@
     enable = true;
     enableOnBoot = false;
   };
+
+  #DDCUTIL
+  services.udev.extraRules = ''
+    KERNEL=="i2c-[0-9]*", MODE="0660", GROUP="video"
+  '';
+
+  environment.etc."local/bin/brightness" = {
+    source = ./scripts/brightness;
+    mode = "0755";
+  };
 }

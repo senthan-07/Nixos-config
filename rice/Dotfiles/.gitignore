@@ -1,4 +1,5 @@
 # Written by rice (matugen) on every wallpaper change; regenerate instead of committing.
+kitty/dark-theme.auto.conf
 kitty/light-theme.auto.conf
 kitty/no-preference-theme.auto.conf
 kitty/*.pre-rice

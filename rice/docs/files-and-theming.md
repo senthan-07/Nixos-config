@@ -49,8 +49,7 @@ and `rice/matugen/apply.sh` renders the app templates in `rice/matugen/templates
 If a newly created app folder has no `~/.config` link yet, `apply.sh` creates the link. If a *real* folder is already in
 the way, it leaves it alone and logs a warning; run `Dotfiles/symlink` to fix that.
 
-Generated files are listed in `Dotfiles/.gitignore`, so they don't show up as changes. The exception is
-`kitty/dark-theme.auto.conf`, which your repo already tracks.
+Generated files are listed in `Dotfiles/.gitignore`, so they don't show up as changes.
 
 Controls:
 

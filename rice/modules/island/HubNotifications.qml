@@ -9,7 +9,19 @@ import qs.modules.notifications
 Item {
     id: root
 
-    readonly property var items: [...Notifs.history].reverse()
+    // Rebuilt only while this tab is open: the hub exists on every screen and
+    // a binding would recreate every card on each new notification.
+    readonly property bool live: IslandState.expanded && IslandState.tab === "notifications"
+    property var items: []
+    function refresh() { items = [...Notifs.history].reverse(); }
+    onLiveChanged: if (live) refresh()
+    Component.onCompleted: refresh()
+
+    Connections {
+        target: Notifs
+        enabled: root.live
+        function onHistoryChanged() { root.refresh(); }
+    }
 
     implicitWidth: 780
     implicitHeight: items.length ? Math.min(380, header.height + Tokens.space.s + list.implicitHeight) : 200

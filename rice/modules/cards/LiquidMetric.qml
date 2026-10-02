@@ -15,6 +15,8 @@ Item {
     property bool elevated: true
 
     readonly property MetricInfo info: MetricInfo { metric: root.metric; live: root.running }
+    // Stepped so small load jitter doesn't re-tessellate both cookies every sample.
+    readonly property real depth: 0.07 + 0.05 * Math.round(info.level * 20) / 20
 
     implicitWidth: 140
     implicitHeight: 140
@@ -32,7 +34,7 @@ Item {
             id: body
             anchors.fill: parent
             sides: root.sides
-            depth: 0.07 + 0.05 * root.info.level
+            depth: root.depth
             color: root.info.container
             layer.enabled: root.elevated
             layer.effect: MultiEffect {
@@ -69,7 +71,7 @@ Item {
             id: mask
             anchors.fill: parent
             sides: body.sides
-            depth: body.depth
+            depth: root.depth
             color: "white"
             visible: false
             layer.enabled: true

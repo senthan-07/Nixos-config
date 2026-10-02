@@ -66,11 +66,6 @@ Singleton {
     }
 
     function toggle(app) { setEnabled(app, !isEnabled(app)); }
-    function setMasterEnabled(on) { store.set("enabled", !!on); if (on) regenerate(); }
-    function setScheme(name) { Settings.data.scheme = name || "scheme-tonal-spot"; Wallpapers.regenerate(); }
-    function setMode(m) { store.set("mode", ["dark", "light"].includes(m) ? m : "auto"); regenerate(); }
-    function setSourceColorIndex(i) { Settings.data.sourceColorIndex = Math.max(0, Math.min(3, Math.round(i))); Wallpapers.regenerate(); }
-    function setContrast(c) { Settings.data.schemeContrast = Math.max(-1, Math.min(1, Number(c) || 0)); Wallpapers.regenerate(); }
 
     readonly property var enabledTargets: apps.map(a => a.id).filter(id => isEnabled(id))
 

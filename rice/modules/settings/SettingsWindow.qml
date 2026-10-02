@@ -122,6 +122,9 @@ FloatingWindow {
         Loader {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            // Only while shown, so a closed window runs no page timers,
+            // processes or peak meters.
+            active: root.visible
             source: `pages/${root.current}Page.qml`
             asynchronous: false
         }

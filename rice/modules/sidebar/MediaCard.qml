@@ -41,7 +41,7 @@ ClippingRectangle {
     Component.onCompleted: updateLength()
 
     Timer {
-        running: root.visible && (root.player?.isPlaying ?? false)
+        running: root.visible && root.Window.visibility !== Window.Hidden && (root.player?.isPlaying ?? false)
         interval: 500
         repeat: true
         triggeredOnStart: true

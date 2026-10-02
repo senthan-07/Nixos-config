@@ -42,8 +42,9 @@ Chip {
 
     // Position is not a notifying property; poll while playing.
     Timer {
-        running: root.player?.isPlaying ?? false
+        running: root.visible && (root.player?.isPlaying ?? false)
         repeat: true
+        triggeredOnStart: true
         interval: 1000
         onTriggered: root.player.positionChanged()
     }

@@ -736,8 +736,9 @@ PanelWindow {
         Connections {
             target: root
             enabled: root.mode === "pick"
-            function onPxChanged() { pixel.sample(); }
-            function onPyChanged() { pixel.sample(); }
+            // Coalesced: a pointer move changes px and py together.
+            function onPxChanged() { Qt.callLater(pixel.sample); }
+            function onPyChanged() { Qt.callLater(pixel.sample); }
         }
     }
 

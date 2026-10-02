@@ -16,7 +16,7 @@ PanelWindow {
     property bool shown: false
 
     screen: Quickshell.screens[0]
-    visible: shown || pill.opacity > 0
+    visible: (shown && !Panels.locked) || pill.opacity > 0
     anchors.bottom: true
     margins.bottom: Tokens.space.xxl * 2 + 64 + Tokens.space.m
     implicitWidth: pill.implicitWidth + 16

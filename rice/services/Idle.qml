@@ -24,32 +24,18 @@ Singleton {
     readonly property bool lockBeforeSleep: store.get("lockBeforeSleep", true)
 
     readonly property bool paused: Panels.caffeine
-    readonly property bool screensOff: screenOff.isIdle && screenOff.enabled
     readonly property bool idle: lock.isIdle || screenOff.isIdle || suspend.isIdle
     // Hyprland-only side effects (dpms, sleep inhibitor) are skipped elsewhere.
     readonly property bool live: !!Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE")
-
-    // Presets offered by settings UIs, in seconds.
-    readonly property var presets: [0, 60, 120, 180, 300, 600, 900, 1800, 3600]
 
     function setEnabled(on) { store.set("enabled", !!on); }
     function setLockAfter(s) { store.set("lockAfter", clamp(s)); }
     function setScreenOffAfter(s) { store.set("screenOffAfter", clamp(s)); }
     function setSuspendAfter(s) { store.set("suspendAfter", clamp(s)); }
-    function setLockBeforeSleep(on) { store.set("lockBeforeSleep", !!on); }
 
     function clamp(s) {
         const n = Math.round(Number(s) || 0);
         return Math.max(0, Math.min(86400, n));
-    }
-
-    // "5 min", "1 h", "Never" for settings rows.
-    function label(s) {
-        if (!s) return "Never";
-        if (s < 60) return `${s} s`;
-        if (s < 3600) return `${Math.round(s / 60)} min`;
-        const h = s / 3600;
-        return `${Number.isInteger(h) ? h : h.toFixed(1)} h`;
     }
 
     function lockNow() {

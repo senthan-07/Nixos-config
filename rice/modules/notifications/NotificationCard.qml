@@ -106,12 +106,19 @@ Surface {
             StyledText {
                 Layout.fillWidth: true
                 visible: text !== ""
-                text: root.notification?.body ?? ""
+                // Bodies may carry markup (links from browsers/chat apps);
+                // images are dropped and links take the theme colour.
+                text: (root.notification?.body ?? "").replace(/<img\b[^>]*>/gi, "")
                 textFormat: Text.StyledText
                 wrapMode: Text.Wrap
                 maximumLineCount: root.popup ? 3 : 6
                 color: Theme.alpha(root.content, 0.85)
+                linkColor: root.critical ? Theme.errorContainerFg : Theme.primary
                 onLinkActivated: link => Qt.openUrlExternally(link)
+                HoverHandler {
+                    enabled: parent.hoveredLink !== ""
+                    cursorShape: Qt.PointingHandCursor
+                }
             }
 
             Flow {

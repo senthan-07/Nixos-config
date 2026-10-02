@@ -10,7 +10,8 @@ CardFrame {
     id: root
 
     property int offset: 0
-    readonly property date today: Time.now
+    // Follows the clock only when the date changes, so the grid isn't rebuilt every second.
+    property date today: new Date()
     readonly property date month: new Date(today.getFullYear(), today.getMonth() + offset, 1)
     readonly property var days: {
         const first = (month.getDay() + 6) % 7;
@@ -23,6 +24,13 @@ CardFrame {
         const first = (month.getDay() + 6) % 7;
         const len = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
         return Math.ceil((first + len) / 7);
+    }
+
+    Connections {
+        target: Time
+        function onNowChanged() {
+            if (Time.now.toDateString() !== root.today.toDateString()) root.today = Time.now;
+        }
     }
 
     implicitWidth: 272

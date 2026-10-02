@@ -12,7 +12,6 @@ import Quickshell.Services.Polkit
 Singleton {
     id: root
 
-    readonly property bool registered: loader.item ? loader.item.isRegistered : false
     readonly property var flow: loader.item ? loader.item.flow : null
 
     // Dialog state.

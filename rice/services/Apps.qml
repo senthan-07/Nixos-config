@@ -17,13 +17,12 @@ Singleton {
 
     function score(entry, q) {
         const name = entry.name.toLowerCase();
-        const extra = [entry.genericName, entry.comment, ...(entry.keywords || [])].join(" ").toLowerCase();
         let s = 0;
         if (name === q) s = 1000;
         else if (name.startsWith(q)) s = 800;
         else if (name.split(/[\s\-_.]/).some(w => w.startsWith(q))) s = 600;
         else if (name.includes(q)) s = 400;
-        else if (extra.includes(q)) s = 200;
+        else if ([entry.genericName, entry.comment, ...(entry.keywords || [])].join(" ").toLowerCase().includes(q)) s = 200;
         else {
             // Subsequence match, e.g. "vsc" -> "Visual Studio Code".
             let i = 0;

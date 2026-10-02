@@ -170,10 +170,6 @@ Singleton {
         }
     }
 
-    function isFocused(key) {
-        return windowsFor(key).some(t => t.activated);
-    }
-
     // Click behaviour: launch when not running, focus when in the background,
     // cycle through the app's windows when it already has focus.
     function activate(key) {
@@ -207,10 +203,6 @@ Singleton {
         launchTimeout.restart();
         launched(key);
         return true;
-    }
-
-    function runAction(action) {
-        if (action) Apps.run(action.command);
     }
 
     function closeAll(key) {
@@ -252,42 +244,39 @@ Singleton {
     Process {
         id: lister
         // Tab separated: mtime, type (d/f/l), size, name. Hidden files skipped.
-        command: ["sh", "-c",
-            'd="$1"; [ -d "$d" ] || { echo "!missing"; exit 0; }; ' +
-            'find "$d" -mindepth 1 -maxdepth 1 ! -name ".*" -printf "%T@\\t%y\\t%s\\t%f\\n" 2>/dev/null ' +
-            '| sort -rn -t "\t" -k1,1 | awk -v max="$2" \'NR<=max{print} END{print "#" NR}\'',
-            "sh", root.folder, String(root.maxFiles)]
-        stdout: StdioCollector {
-            onStreamFinished: root.parseListing(text)
-        }
+        command: ["find", root.folder, "-mindepth", "1", "-maxdepth", "1", "!", "-name", ".*",
+            "-printf", "%T@\\t%y\\t%s\\t%f\\n"]
+        environment: ({ LC_ALL: "C" })
+        stdout: StdioCollector { id: listerOut }
+        stderr: StdioCollector { id: listerErr }
         onExited: code => {
             root.folderLoading = false;
-            if (code !== 0) root.folderError = "Couldn't read the folder";
+            root.parseListing(listerOut.text, code !== 0 && listerErr.text.includes("No such file"));
         }
     }
 
-    function parseListing(text) {
-        const out = [];
-        let total = 0;
-        let error = "";
+    function parseListing(text, missing) {
+        const rows = [];
         for (const line of text.split("\n")) {
-            if (!line) continue;
-            if (line === "!missing") { error = "Folder not found"; continue; }
-            if (line[0] === "#") { total = parseInt(line.slice(1)) || 0; continue; }
             const p = line.split("\t");
             if (p.length < 4) continue;
-            const name = p.slice(3).join("\t");
+            rows.push({ mtime: parseFloat(p[0]) * 1000, p: p });
+        }
+        rows.sort((a, b) => b.mtime - a.mtime);
+        const out = [];
+        for (const r of rows.slice(0, maxFiles)) {
+            const name = r.p.slice(3).join("\t");
             out.push({
                 name: name,
                 path: `${folder}/${name}`,
-                dir: p[1] === "d",
-                mtime: parseFloat(p[0]) * 1000,
-                size: parseInt(p[2]) || 0
+                dir: r.p[1] === "d",
+                mtime: r.mtime,
+                size: parseInt(r.p[2]) || 0
             });
         }
-        folderError = error;
+        folderError = missing ? "Folder not found" : "";
         files = out;
-        fileTotal = total;
+        fileTotal = rows.length;
     }
 
     Timer {

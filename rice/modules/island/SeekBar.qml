@@ -27,7 +27,8 @@ Item {
     Behavior on amplitude { Anim { duration: Motion.duration.long } }
 
     NumberAnimation on phase {
-        running: root.playing && root.visible
+        // Only while a wave is drawn and its window is mapped.
+        running: root.playing && root.amplitude > 0 && root.visible && root.Window.visibility !== Window.Hidden
         from: 0; to: Math.PI * 2
         duration: 1600
         loops: Animation.Infinite

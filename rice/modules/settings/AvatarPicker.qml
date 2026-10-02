@@ -117,98 +117,102 @@ Item {
                 }
             }
 
-            GridView {
-                id: grid
+            // The folder is only listed (and thumbnails decoded) while shown.
+            Loader {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                readonly property int columns: Math.max(3, Math.floor(width / 150))
-                cellWidth: Math.floor(width / columns)
-                cellHeight: cellWidth + 22
-                ScrollBar.vertical: ScrollBar {}
+                active: root.visible
+                sourceComponent: GridView {
+                    id: grid
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    readonly property int columns: Math.max(3, Math.floor(width / 150))
+                    cellWidth: Math.floor(width / columns)
+                    cellHeight: cellWidth + 22
+                    ScrollBar.vertical: ScrollBar {}
 
-                model: FolderListModel {
-                    id: files
-                    folder: "file://" + root.folder
-                    showDirsFirst: true
-                    showHidden: false
-                    caseSensitive: false
-                    nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif", "*.bmp", "*.avif", "*.svg"]
-                }
+                    model: FolderListModel {
+                        id: files
+                        folder: "file://" + root.folder
+                        showDirsFirst: true
+                        showHidden: false
+                        caseSensitive: false
+                        nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif", "*.bmp", "*.avif", "*.svg"]
+                    }
 
-                delegate: Item {
-                    id: cell
-                    required property string fileName
-                    required property string filePath
-                    required property bool fileIsDir
+                    delegate: Item {
+                        id: cell
+                        required property string fileName
+                        required property string filePath
+                        required property bool fileIsDir
 
-                    width: grid.cellWidth
-                    height: grid.cellHeight
+                        width: grid.cellWidth
+                        height: grid.cellHeight
 
-                    Surface {
-                        id: tile
-                        anchors.fill: parent
-                        anchors.margins: Tokens.space.xs
-                        radius: Tokens.radius.m
-                        interactive: true
-                        base: hovered ? Theme.surfaceHigh : Theme.alpha(Theme.surfaceHigh, 0)
-                        onClicked: cell.fileIsDir ? root.folder = cell.filePath : Avatar.set(cell.filePath)
-
-                        ColumnLayout {
+                        Surface {
+                            id: tile
                             anchors.fill: parent
-                            anchors.margins: Tokens.space.s
-                            spacing: Tokens.space.xs
+                            anchors.margins: Tokens.space.xs
+                            radius: Tokens.radius.m
+                            interactive: true
+                            base: hovered ? Theme.surfaceHigh : Theme.alpha(Theme.surfaceHigh, 0)
+                            onClicked: cell.fileIsDir ? root.folder = cell.filePath : Avatar.set(cell.filePath)
 
-                            Item {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: Tokens.space.s
+                                spacing: Tokens.space.xs
 
-                                Icon {
-                                    anchors.centerIn: parent
-                                    visible: cell.fileIsDir
-                                    text: "folder"
-                                    fill: 1
-                                    size: 56
-                                    color: Theme.primary
-                                }
-                                // Circular preview, as the picture will appear.
-                                ClippingRectangle {
-                                    anchors.centerIn: parent
-                                    visible: !cell.fileIsDir
-                                    width: Math.min(parent.width, parent.height)
-                                    height: width
-                                    radius: width / 2
-                                    color: Theme.surfaceHighest
-                                    border.width: tile.hovered ? 3 : 0
-                                    border.color: Theme.primary
-                                    Image {
-                                        anchors.fill: parent
-                                        source: cell.fileIsDir ? "" : "file://" + cell.filePath
-                                        sourceSize.width: 200
-                                        sourceSize.height: 200
-                                        fillMode: Image.PreserveAspectCrop
-                                        asynchronous: true
+                                Item {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+
+                                    Icon {
+                                        anchors.centerIn: parent
+                                        visible: cell.fileIsDir
+                                        text: "folder"
+                                        fill: 1
+                                        size: 56
+                                        color: Theme.primary
+                                    }
+                                    // Circular preview, as the picture will appear.
+                                    ClippingRectangle {
+                                        anchors.centerIn: parent
+                                        visible: !cell.fileIsDir
+                                        width: Math.min(parent.width, parent.height)
+                                        height: width
+                                        radius: width / 2
+                                        color: Theme.surfaceHighest
+                                        border.width: tile.hovered ? 3 : 0
+                                        border.color: Theme.primary
+                                        Image {
+                                            anchors.fill: parent
+                                            source: cell.fileIsDir ? "" : "file://" + cell.filePath
+                                            sourceSize.width: 200
+                                            sourceSize.height: 200
+                                            fillMode: Image.PreserveAspectCrop
+                                            asynchronous: true
+                                        }
                                     }
                                 }
-                            }
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: cell.fileName
-                                font.pixelSize: Tokens.font.s
-                                horizontalAlignment: Text.AlignHCenter
-                                elide: Text.ElideMiddle
-                                color: Theme.surfaceVariantFg
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: cell.fileName
+                                    font.pixelSize: Tokens.font.s
+                                    horizontalAlignment: Text.AlignHCenter
+                                    elide: Text.ElideMiddle
+                                    color: Theme.surfaceVariantFg
+                                }
                             }
                         }
                     }
-                }
 
-                StyledText {
-                    anchors.centerIn: parent
-                    visible: files.status === FolderListModel.Ready && grid.count === 0
-                    text: "No images in this folder"
-                    color: Theme.surfaceVariantFg
+                    StyledText {
+                        anchors.centerIn: parent
+                        visible: files.status === FolderListModel.Ready && grid.count === 0
+                        text: "No images in this folder"
+                        color: Theme.surfaceVariantFg
+                    }
                 }
             }
         }

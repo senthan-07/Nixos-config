@@ -118,8 +118,6 @@ Singleton {
     }
 
     // ---- labels ----------------------------------------------------------------
-    function isOverdue(item) { return !item.done && item.due && item.due <= now; }
-
     function dueLabel(due) {
         if (!due) return "";
         const d = new Date(due), n = new Date(now);

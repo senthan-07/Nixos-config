@@ -52,41 +52,42 @@ Item {
     }
 
     // --- image thumbnail
-    Item {
+    Loader {
         anchors.fill: parent
-        visible: root.kind === "thumb"
+        active: root.kind === "thumb"
+        sourceComponent: Item {
+            Rectangle {
+                anchors.fill: parent
+                radius: Tokens.radius.s
+                color: Theme.surfaceHighest
+            }
 
-        Rectangle {
-            anchors.fill: parent
-            radius: Tokens.radius.s
-            color: Theme.surfaceHighest
-        }
+            Image {
+                id: thumb
+                anchors.fill: parent
+                source: `file://${root.d.thumb}`
+                sourceSize.width: root.size * 2
+                sourceSize.height: root.size * 2
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                visible: false
+            }
 
-        Image {
-            id: thumb
-            anchors.fill: parent
-            source: root.kind === "thumb" ? `file://${root.d.thumb}` : ""
-            sourceSize.width: root.size * 2
-            sourceSize.height: root.size * 2
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            visible: false
-        }
+            Rectangle {
+                id: thumbMask
+                anchors.fill: parent
+                radius: Tokens.radius.s
+                visible: false
+                layer.enabled: true
+            }
 
-        Rectangle {
-            id: thumbMask
-            anchors.fill: parent
-            radius: Tokens.radius.s
-            visible: false
-            layer.enabled: true
-        }
-
-        MultiEffect {
-            anchors.fill: parent
-            source: thumb
-            maskEnabled: true
-            maskSource: thumbMask
-            visible: thumb.status === Image.Ready
+            MultiEffect {
+                anchors.fill: parent
+                source: thumb
+                maskEnabled: true
+                maskSource: thumbMask
+                visible: thumb.status === Image.Ready
+            }
         }
     }
 

@@ -76,9 +76,8 @@ Singleton {
         proc.running = true;
     }
 
-    function kindFor(name, dir) {
-        if (dir) return "folder";
-        const ext = name.includes(".") ? name.slice(name.lastIndexOf(".") + 1).toLowerCase() : "";
+    // extension -> kind
+    readonly property var kinds: {
         const groups = {
             image: "png jpg jpeg gif webp bmp svg tiff tif heic avif ico xcf psd raw cr2 nef",
             video: "mp4 mkv webm avi mov flv wmv m4v mpg mpeg",
@@ -91,8 +90,15 @@ Singleton {
             code: "qml js ts jsx tsx py rs go c h cpp hpp cc java kt swift rb php lua nix sh bash zsh fish html css scss json yaml yml toml ini conf xml sql",
             exec: "appimage exe bin run"
         };
-        for (const k in groups) if (groups[k].split(" ").includes(ext)) return k;
-        return "file";
+        const map = {};
+        for (const k in groups) for (const ext of groups[k].split(" ")) if (!(ext in map)) map[ext] = k;
+        return map;
+    }
+
+    function kindFor(name, dir) {
+        if (dir) return "folder";
+        const ext = name.includes(".") ? name.slice(name.lastIndexOf(".") + 1).toLowerCase() : "";
+        return Object.prototype.hasOwnProperty.call(kinds, ext) ? kinds[ext] : "file";
     }
 
     function rank(path, words) {

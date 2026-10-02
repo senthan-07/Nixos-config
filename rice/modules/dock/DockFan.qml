@@ -61,7 +61,8 @@ Item {
     HoverHandler { id: hover }
 
     Repeater {
-        model: root.entries
+        // Tiles (and their thumbnails) exist only while the fan is on screen.
+        model: root.visible ? root.entries : []
 
         Item {
             id: tile

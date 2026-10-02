@@ -52,15 +52,22 @@ PanelWindow {
         onCleared: IslandState.close()
     }
 
-    onModeChanged: if (mode === "hub") Qt.callLater(() => hub.forceActiveFocus())
 
     // ---- Morph driver ----
     // Width/height are set imperatively so each change can pick the right
     // curve: a springy overshoot when growing, a quick settle when shrinking.
+    // The spring is only for real morphs (opening, compact <-> hub): inside
+    // the hub, switching tabs resizes with a plain ease so it doesn't wobble.
     property bool growW: true
     property bool growH: true
-    onTargetWChanged: { growW = targetW >= pill.width; pill.width = targetW; }
-    onTargetHChanged: { growH = targetH >= pill.height; pill.height = targetH; }
+    property real modeChangedAt: 0
+    onModeChanged: {
+        modeChangedAt = Date.now();
+        if (mode === "hub") Qt.callLater(() => hub.forceActiveFocus());
+    }
+    function springy(grow) { return grow && (mode !== "hub" || Date.now() - modeChangedAt < 250); }
+    onTargetWChanged: { growW = springy(targetW >= pill.width); pill.width = targetW; }
+    onTargetHChanged: { growH = springy(targetH >= pill.height); pill.height = targetH; }
 
     RectangularShadow {
         anchors.fill: pill
@@ -76,13 +83,15 @@ PanelWindow {
     ClippingRectangle {
         id: pill
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        // Whole-pixel position: centring with anchors put the pill (and the
+        // text it clips) on half pixels while its width animated, which made
+        // the contents shimmer.
+        x: Math.round((parent.width - width) / 2)
         y: Tokens.space.xs + 2
         width: 72
         height: 8
         radius: root.targetR
         opacity: root.mode === "idle" ? 0 : 1
-        scale: root.mode === "idle" ? 0.9 : 1
         property color tint: root.mode === "hub" && IslandState.tab === "media" && Media.active ? MediaPalette.surface
             : root.mode === "notification" && notif.critical ? Theme.errorContainer
             : Theme.surfaceContainer
@@ -106,7 +115,6 @@ PanelWindow {
         }
         Behavior on radius { Anim { duration: Motion.duration.medium } }
         Behavior on opacity { Anim { duration: root.mode === "idle" ? Motion.duration.medium : Motion.duration.short } }
-        Behavior on scale { Anim { easing.bezierCurve: Motion.curve.springDefault } }
         Behavior on tint { ColorAnim { duration: Motion.duration.medium } }
 
         // Blurred art wash behind the media hub.
@@ -167,14 +175,14 @@ PanelWindow {
         readonly property bool current: root.mode === name
         readonly property Item item: holder.children[0] ?? null
 
-        anchors.horizontalCenter: parent.horizontalCenter
+        // Fixed on screen (whole pixels) while the pill grows around it:
+        // centred on the window, not on the animating pill.
+        x: Math.round((pill.parent.width - width) / 2) - pill.x
         anchors.top: parent.top
         width: item?.implicitWidth ?? 0
         height: item?.implicitHeight ?? 0
         opacity: current ? 1 : 0
         visible: current || opacity > 0
-        scale: current ? 1 : 0.94
-        transformOrigin: Item.Top
 
         Behavior on opacity {
             SequentialAnimation {
@@ -186,7 +194,6 @@ PanelWindow {
                 }
             }
         }
-        Behavior on scale { Anim { duration: Motion.duration.long; easing.bezierCurve: Motion.curve.emphasizedDecel } }
 
         Item {
             id: holder

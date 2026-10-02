@@ -34,6 +34,7 @@ ShellRoot {
         // polkit agent, weather cache, first-run theming).
         Panels.ready;
         Avatar.path;
+        BluetoothPower.restored;
         Notifs.popups;
         Ecosystem.enabled;
         Idle.enabled;

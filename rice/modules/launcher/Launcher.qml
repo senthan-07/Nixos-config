@@ -185,10 +185,9 @@ PanelWindow {
         }
     }
 
+    // Reads Currency.rates when relevant, so answers refresh when rates arrive.
     readonly property var answer: (mode === "apps" || mode === "calc")
         ? computeAnswer(query, mode === "calc") : null
-    // Touch the rate table so answers refresh when rates arrive.
-    readonly property var _rates: Currency.rates
 
     // ------------------------------------------------------------ items
     readonly property string view: mode === "apps" && gridLayout && !answer ? "appgrid"
@@ -197,10 +196,10 @@ PanelWindow {
         : mode === "clipboard" ? "clipboard" : "list"
 
     // Every item records the view it was built for, so views never render
-    // another mode's items during a mode switch.
-    readonly property var items: tag(view, build(mode, query, view, expandedKey, answer, _rates,
-        Clipboard.entries, FileSearch.results, Wallpapers.list, store.data,
-        Settings.data.darkMode, Settings.data.doNotDisturb, Panels.caffeine, Keybinds.rows))
+    // another mode's items during a mode switch. Dependencies are whatever the
+    // current mode's branch of build() reads, so other modes' sources
+    // (clipboard, files, wallpapers…) don't trigger rebuilds.
+    readonly property var items: tag(view, build(mode, query, view))
 
     function tag(v, list) {
         for (const it of list) it.view = v;
@@ -489,10 +488,11 @@ PanelWindow {
                 const rec = recent.map(c => byChar[c]).filter(Boolean).map(e => mk(e, true));
                 return rec.concat(Emoji.list.map(e => mk(e, false)));
             }
+            const groups = Emoji.groups.map(g => g.toLowerCase());
             const scored = [];
             for (const e of Emoji.list) {
                 const name = e[1].toLowerCase();
-                if (!words.every(w => name.includes(w) || Emoji.groups[e[2]].toLowerCase().includes(w))) continue;
+                if (!words.every(w => name.includes(w) || groups[e[2]].includes(w))) continue;
                 let s = name.startsWith(words[0]) ? 3 : name.split(/[\s:-]/).some(p => p.startsWith(words[0])) ? 2 : 1;
                 if (recent.includes(e[0])) s += 2;
                 scored.push({ e: e, s: s });

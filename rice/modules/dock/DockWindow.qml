@@ -98,10 +98,13 @@ PanelWindow {
     property real amp: magnifying ? 1 : 0
     Behavior on amp { Anim { duration: Motion.duration.short; easing.bezierCurve: Motion.curve.standard } }
     readonly property bool magnifying: magnify > 1 && pointerInDock && !dragKey && menuKey === "" && !fanOpen
+    // The layout only follows the pointer while magnified; at rest, pointer
+    // motion must not rebuild it (and every slot binding with it).
+    readonly property real layoutPointer: amp > 0 ? pointerX : 0
 
     readonly property var layout: {
         const radius = 2.6;
-        const px = pointerX - restLeft;
+        const px = layoutPointer - restLeft;
         const map = {};
         let rest = pad;
         let cursor = pad;
@@ -167,7 +170,10 @@ PanelWindow {
     readonly property bool hidden: wantHide && !revealed && !busy
     onBusyChanged: {
         if (busy) { revealed = true; hideTimer.stop(); }
-        else hideTimer.restart();
+        else {
+            hideTimer.restart();
+            if (trackWindows) hyprRefresh.restart();
+        }
     }
 
     Timer { id: hideTimer; interval: 600; onTriggered: win.revealed = false }
@@ -189,10 +195,11 @@ PanelWindow {
     readonly property bool trackWindows: Dock.autohide && Dock.smartHide && hyprland
     onTrackWindowsChanged: if (trackWindows) hyprRefresh.restart()
     Timer { id: hyprRefresh; interval: 150; onTriggered: Hyprland.refreshToplevels() }
+    // While busy the dock is shown regardless of overlap, so skip polling.
     Timer {
         interval: 500
         repeat: true
-        running: win.trackWindows
+        running: win.trackWindows && !win.busy
         onTriggered: Hyprland.refreshToplevels()
     }
     Connections {

@@ -319,6 +319,7 @@ CardFrame {
         border.color: Theme.alpha(Theme.outlineVariant, 0.6)
 
         readonly property var presets: {
+            if (root.pickerFor === "") return [];
             const n = new Date(Todo.now);
             const at = (days, h, m) => { const d = new Date(n); d.setDate(d.getDate() + days); d.setHours(h, m, 0, 0); return d.getTime(); };
             const list = [{ label: "In 1 hour", due: Todo.now + 3600e3 }];

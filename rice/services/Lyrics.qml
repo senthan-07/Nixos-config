@@ -14,7 +14,7 @@ import Quickshell.Io
 //   lines       [{ time: seconds, text }] sorted; plain lyrics get time -1
 //   synced      true when `lines` carry timestamps
 //   index       current line for the player position (-1 before the first)
-//   position    player position in seconds, refreshed while tracking
+//   position    player position in seconds, refreshed at line changes while tracking
 Singleton {
     id: root
 
@@ -42,12 +42,6 @@ Singleton {
     property real position: 0
     readonly property int index: synced ? indexAt(position + offset + 0.15) : -1
     readonly property string currentLine: index >= 0 && index < lines.length ? lines[index].text : ""
-    readonly property string nextLine: index + 1 < lines.length && synced ? lines[index + 1].text : ""
-    readonly property real lineProgress: {
-        if (index < 0 || index + 1 >= lines.length) return 0;
-        const a = lines[index].time, b = lines[index + 1].time;
-        return b > a ? Math.max(0, Math.min(1, (position + offset - a) / (b - a))) : 0;
-    }
 
     property int _req: 0
     property string _loadedKey: ""
@@ -59,8 +53,15 @@ Singleton {
         return String(s || "").trim();
     }
 
+    // Position is only re-read when the next line is due (or on seeks), not polled.
     function syncPosition() {
         if (player) position = player.position;
+        if (!tracking) { tick.stop(); return; }
+        const next = lines[index + 1];
+        const rate = player.rate > 0 ? player.rate : 1;
+        const due = next ? (next.time - position - offset - 0.15) / rate * 1000 + 20 : 1000;
+        tick.interval = Math.max(20, Math.min(1000, Math.ceil(due)));
+        tick.restart();
     }
 
     function retry() {
@@ -288,9 +289,7 @@ Singleton {
     }
 
     Timer {
-        interval: 100
-        repeat: true
-        running: root.tracking
+        id: tick
         onTriggered: root.syncPosition()
     }
 

@@ -13,7 +13,6 @@ Singleton {
 
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false
-    readonly property real micVolume: source?.audio?.volume ?? 0
     readonly property bool micMuted: source?.audio?.muted ?? false
 
     // Emitted for user-visible volume changes so the OSD can react.
@@ -27,13 +26,6 @@ Singleton {
         if (sink?.ready && sink.audio) {
             sink.audio.muted = false;
             sink.audio.volume = Math.max(0, Math.min(1.5, v));
-        }
-    }
-
-    function setMicVolume(v) {
-        if (source?.ready && source.audio) {
-            source.audio.muted = false;
-            source.audio.volume = Math.max(0, Math.min(1.5, v));
         }
     }
 

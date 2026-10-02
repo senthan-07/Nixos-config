@@ -15,7 +15,9 @@ WeatherCard {
     readonly property real rise: today ? today.sunrise.getTime() : NaN
     readonly property real set: today ? today.sunset.getTime() : NaN
     readonly property bool isDay: now >= rise && now < set
-    readonly property real dayFrac: Weather.valid(rise) ? Math.max(0, Math.min(1, (now - rise) / (set - rise))) : 0
+    // Minute steps: the arc moves a fraction of a pixel per minute, so don't re-tessellate it every second.
+    readonly property real minuteNow: Math.floor(now / 60000) * 60000
+    readonly property real dayFrac: Weather.valid(rise) ? Math.max(0, Math.min(1, (minuteNow - rise) / (set - rise))) : 0
     readonly property string countdown: {
         if (!today) return "";
         let target = now < rise ? rise : now < set ? set : tomorrow ? tomorrow.sunrise.getTime() : NaN;

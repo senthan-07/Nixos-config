@@ -59,7 +59,6 @@ Singleton {
             fail("Install <b>wf-recorder</b> (or gpu-screen-recorder) to record the screen.");
             return false;
         }
-        kind = "screen";
         withAudio = !!o.audio;
         backend = wf ? "wf-recorder" : "gpu-screen-recorder";
         target = o.output ? o.output : `${o.size?.[0] ?? "?"} × ${o.size?.[1] ?? "?"} region`;
@@ -101,7 +100,6 @@ exec "$@"`;
             fail("Install <b>pipewire</b> (pw-record) to record audio.");
             return false;
         }
-        kind = "audio";
         source = src === "mic" ? "mic" : "system";
         withAudio = true;
         backend = "pw-record";
@@ -122,11 +120,6 @@ if [ "$2" = system ]; then exec pw-record -P '{ stream.capture.sink = true }' "$
         state = "stopping";
         proc.signal(2);   // SIGINT: let the recorder finalise the file
         killTimer.restart();
-    }
-
-    function toggle() {
-        if (active) stop();
-        else startScreen({ output: Capture.focusedOutput, audio: Capture.recordAudio });
     }
 
     function launch(cmd) {
@@ -247,11 +240,15 @@ if [ "$2" = system ]; then exec pw-record -P '{ stream.capture.sink = true }' "$
         onTriggered: if (root.state === "error") root.state = "idle"
     }
 
+    // Once recording, wake just after each whole second of `elapsed`.
     Timer {
         interval: 250
         repeat: true
         running: root.active
         triggeredOnStart: true
-        onTriggered: root.now = Date.now()
+        onTriggered: {
+            root.now = Date.now();
+            interval = root.startedAt > 0 ? 1060 - (root.now - root.startedAt) % 1000 : 250;
+        }
     }
 }

@@ -18,7 +18,7 @@ Scope {
 
     property bool open: false
     property int index: 0
-    property var windows: []          // [{ toplevel, wayland, title, cls, ws, icon, name }]
+    property var windows: []          // [{ toplevel, wayland, title, cls, icon, name }]
 
     function refresh() {
         Hyprland.refreshToplevels();
@@ -35,7 +35,6 @@ Scope {
                     title: t.title || o.title || cls,
                     cls, name: entry?.name ?? cls,
                     icon: entry?.icon ?? cls,
-                    ws: o.workspace?.name ?? "",
                     order: o.focusHistoryID ?? 999
                 };
             })
@@ -172,26 +171,6 @@ Scope {
                                 text: tileItem.modelData.title
                                 font.pixelSize: Tokens.font.xs
                                 color: Theme.alpha(tileItem.content, 0.75)
-                            }
-                        }
-
-                        // Workspace badge
-                        Rectangle {
-                            anchors.top: parent.top
-                            anchors.right: parent.right
-                            anchors.margins: Tokens.space.s
-                            visible: false   // all windows are on the current workspace
-                            width: Math.max(20, wsText.implicitWidth + 10)
-                            height: 20
-                            radius: 10
-                            color: Theme.alpha(tileItem.content, 0.12)
-                            StyledText {
-                                id: wsText
-                                anchors.centerIn: parent
-                                text: tileItem.modelData.ws
-                                font.pixelSize: Tokens.font.xs
-                                font.weight: Font.Bold
-                                color: tileItem.content
                             }
                         }
                     }

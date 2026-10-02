@@ -13,9 +13,12 @@ PanelWindow {
 
     property string kind: "volume"
     property bool shown: false
+    // False while the island or the sidebar shows the level instead, so the
+    // (then empty) surface isn't mapped at all.
+    readonly property bool wanted: shown && !Panels.sidebar && !IslandState.replacesOsd
 
     screen: Quickshell.screens[0]
-    visible: shown || pill.opacity > 0
+    visible: wanted || pill.opacity > 0
     anchors.bottom: true
     margins.bottom: Tokens.space.xxl * 2
     implicitWidth: 320
@@ -54,7 +57,7 @@ PanelWindow {
         color: Theme.surfaceContainer
         border.width: 1
         border.color: Theme.alpha(Theme.outlineVariant, 0.6)
-        opacity: root.shown && !Panels.sidebar && !IslandState.replacesOsd ? 1 : 0
+        opacity: root.wanted ? 1 : 0
         scale: root.shown ? 1 : 0.9
         Behavior on opacity { Anim { duration: Motion.duration.short } }
         Behavior on scale { Anim { easing.bezierCurve: Motion.curve.springFast } }

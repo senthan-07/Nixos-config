@@ -65,8 +65,8 @@ FocusScope {
             height: parent.height - 8
             radius: height / 2
             color: Theme.secondaryContainer
-            Behavior on x { Anim { easing.bezierCurve: Motion.curve.springDefault } }
-            Behavior on width { Anim { easing.bezierCurve: Motion.curve.springDefault } }
+            Behavior on x { Anim { easing.bezierCurve: Motion.curve.emphasizedDecel } }
+            Behavior on width { Anim { easing.bezierCurve: Motion.curve.emphasizedDecel } }
         }
 
         Row {
@@ -100,11 +100,26 @@ FocusScope {
                             fill: tabItem.active ? 1 : 0
                             color: tabItem.active ? Theme.secondaryContainerFg : Theme.surfaceVariantFg
                         }
-                        StyledText {
+                        // Bold text is wider than medium: always reserve the
+                        // bold width so switching tabs never resizes them
+                        // (which re-centred the whole strip and made it shake).
+                        Item {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: tabItem.modelData.label
-                            font.weight: tabItem.active ? Font.Bold : Font.Medium
-                            color: tabItem.active ? Theme.secondaryContainerFg : Theme.surfaceVariantFg
+                            implicitWidth: boldWidth.implicitWidth
+                            implicitHeight: label.implicitHeight
+                            StyledText {
+                                id: boldWidth
+                                visible: false
+                                text: tabItem.modelData.label
+                                font.weight: Font.Bold
+                            }
+                            StyledText {
+                                id: label
+                                anchors.centerIn: parent
+                                text: tabItem.modelData.label
+                                font.weight: tabItem.active ? Font.Bold : Font.Medium
+                                color: tabItem.active ? Theme.secondaryContainerFg : Theme.surfaceVariantFg
+                            }
                         }
                         Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
@@ -144,7 +159,9 @@ FocusScope {
         onClicked: IslandState.close()
     }
 
-    // ---- Pages (cross-fade; fixed size so the pill clips during morphs) ----
+    // ---- Pages (hand-off; fixed size so the pill clips during morphs) ----
+    // The old page fades out quickly, then the new one fades in (no movement:
+    // sliding the two pages in opposite directions read as a shake).
     Item {
         id: pages
         anchors.top: tabs.bottom
@@ -153,9 +170,48 @@ FocusScope {
         width: root.page.implicitWidth
         height: root.page.implicitHeight
 
-        HubMedia { id: media; opacity: root.tab === "media" ? 1 : 0; visible: opacity > 0; anchors.horizontalCenter: parent.horizontalCenter; Behavior on opacity { Anim { duration: Motion.duration.medium } } }
-        HubFocus { id: focusPage; opacity: root.tab === "focus" ? 1 : 0; visible: opacity > 0; anchors.horizontalCenter: parent.horizontalCenter; Behavior on opacity { Anim { duration: Motion.duration.medium } } }
-        HubNotifications { id: notifsPage; opacity: root.tab === "notifications" ? 1 : 0; visible: opacity > 0; anchors.horizontalCenter: parent.horizontalCenter; Behavior on opacity { Anim { duration: Motion.duration.medium } } }
-        HubTools { id: tools; opacity: root.tab === "tools" ? 1 : 0; visible: opacity > 0; anchors.horizontalCenter: parent.horizontalCenter; Behavior on opacity { Anim { duration: Motion.duration.medium } } }
+HubMedia {
+            id: media
+            readonly property bool shown: root.tab === "media"
+            anchors.horizontalCenter: parent.horizontalCenter
+            opacity: shown ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { PageFade { incoming: media.shown } }
+        }
+        HubFocus {
+            id: focusPage
+            readonly property bool shown: root.tab === "focus"
+            anchors.horizontalCenter: parent.horizontalCenter
+            opacity: shown ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { PageFade { incoming: focusPage.shown } }
+        }
+        HubNotifications {
+            id: notifsPage
+            readonly property bool shown: root.tab === "notifications"
+            anchors.horizontalCenter: parent.horizontalCenter
+            opacity: shown ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { PageFade { incoming: notifsPage.shown } }
+        }
+        HubTools {
+            id: tools
+            readonly property bool shown: root.tab === "tools"
+            anchors.horizontalCenter: parent.horizontalCenter
+            opacity: shown ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { PageFade { incoming: tools.shown } }
+        }
+    }
+
+    // Outgoing page: quick fade. Incoming: waits for that, then fades in.
+    component PageFade: SequentialAnimation {
+        property bool incoming: false
+        PauseAnimation { duration: incoming ? 90 : 0 }
+        NumberAnimation {
+            duration: incoming ? Motion.duration.short : 90
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: incoming ? Motion.curve.standardDecel : Motion.curve.standardAccel
+        }
     }
 }

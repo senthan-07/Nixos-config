@@ -9,7 +9,14 @@ Surface {
     id: root
 
     property int offset: 0
-    readonly property date today: Time.now
+    // Day-granular (a string only changes at midnight), so the 42-cell grid
+    // isn't rebuilt on every clock tick.
+    readonly property string todayKey: Time.now.toDateString()
+    readonly property date today: {
+        void todayKey;
+        const n = new Date();
+        return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+    }
     readonly property date month: new Date(today.getFullYear(), today.getMonth() + offset, 1)
     readonly property var days: {
         const first = (month.getDay() + 6) % 7;     // Monday first
@@ -82,7 +89,7 @@ Surface {
                     id: cell
                     required property var modelData
                     readonly property bool inMonth: modelData.getMonth() === root.month.getMonth()
-                    readonly property bool isToday: modelData.toDateString() === root.today.toDateString()
+                    readonly property bool isToday: modelData.toDateString() === root.todayKey
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.preferredWidth: 1

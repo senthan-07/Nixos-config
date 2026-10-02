@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.config
+import qs.components
 
 // Global UI state for the overlay surfaces plus the `qs -c rice ipc` interface.
 Singleton {
@@ -15,7 +16,16 @@ Singleton {
     property bool sidebar: false
     property bool power: false
     property bool locked: false
+    // Caffeine survives restarts and logins ($XDG_STATE_HOME/rice/session.json).
     property bool caffeine: false
+    property JsonStore session: JsonStore { name: "session" }
+    property bool caffeineRestored: false
+    readonly property bool sessionReady: session.ready
+    onSessionReadyChanged: if (sessionReady && !caffeineRestored) {
+        caffeine = session.get("caffeine", false);
+        caffeineRestored = true;
+    }
+    onCaffeineChanged: if (caffeineRestored && session.get("caffeine", false) !== caffeine) session.set("caffeine", caffeine)
     // Settings app window (modules/settings) and the page it shows.
     property bool settings: false
     property string settingsPage: "General"

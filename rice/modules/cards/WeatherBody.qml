@@ -106,7 +106,7 @@ Item {
             transform: Translate {
                 id: bob
                 SequentialAnimation on y {
-                    running: root.running && root.visible
+                    running: root.running && content.visible
                     loops: Animation.Infinite
                     NumberAnimation { from: 0; to: 4; duration: 2600; easing.type: Easing.InOutSine }
                     NumberAnimation { from: 4; to: 0; duration: 2600; easing.type: Easing.InOutSine }
@@ -124,7 +124,7 @@ Item {
             spacing: Tokens.space.xs
 
             Repeater {
-                model: (Weather.hourly || []).slice(1, root.width >= 330 ? 7 : 5)
+                model: root.tall ? (Weather.hourly || []).slice(1, root.width >= 330 ? 7 : 5) : []
                 Rectangle {
                     id: hour
                     required property var modelData

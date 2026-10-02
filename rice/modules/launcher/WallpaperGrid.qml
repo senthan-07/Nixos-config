@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
+import Quickshell.Widgets
 import qs.config
 import qs.components
 import qs.services
@@ -63,7 +63,7 @@ GridView {
             scale: mouse.pressed ? 0.97 : mouse.containsMouse ? 1.03 : 1
             Behavior on scale { Anim { duration: Motion.duration.short } }
 
-            Rectangle {
+            ClippingRectangle {
                 anchors.fill: parent
                 radius: Tokens.radius.m
                 color: Theme.surfaceHighest
@@ -74,34 +74,18 @@ GridView {
                     color: Theme.surfaceVariantFg
                     visible: img.status !== Image.Ready
                 }
-            }
 
-            Image {
-                id: img
-                anchors.fill: parent
-                source: `file://${cell.modelData.path}`
-                sourceSize.width: 360
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                visible: false
-            }
-
-            Rectangle {
-                id: mask
-                anchors.fill: parent
-                radius: Tokens.radius.m
-                visible: false
-                layer.enabled: true
-            }
-
-            MultiEffect {
-                anchors.fill: parent
-                source: img
-                maskEnabled: true
-                maskSource: mask
-                visible: img.status === Image.Ready
-                opacity: visible ? 1 : 0
-                Behavior on opacity { Anim { duration: Motion.duration.short } }
+                Image {
+                    id: img
+                    anchors.fill: parent
+                    source: `file://${cell.modelData.path}`
+                    sourceSize.width: 360
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    visible: status === Image.Ready
+                    opacity: visible ? 1 : 0
+                    Behavior on opacity { Anim { duration: Motion.duration.short } }
+                }
             }
 
             Rectangle {

@@ -116,12 +116,14 @@ ListView {
             confirming: root.confirmKey !== "" && root.confirmKey === cell.it.key
         }
 
-        AnswerCard {
-            visible: cell.isAnswer
+        Loader {
+            active: cell.isAnswer
             anchors.fill: parent
-            answer: cell.isAnswer ? cell.it.answer : ({})
-            selected: cell.isSelected
-            copied: root.copiedKey === cell.it.key
+            sourceComponent: AnswerCard {
+                answer: cell.it.answer
+                selected: cell.isSelected
+                copied: root.copiedKey === cell.it.key
+            }
         }
 
         MouseArea {

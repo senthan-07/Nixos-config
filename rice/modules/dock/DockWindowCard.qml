@@ -93,7 +93,7 @@ Surface {
         // Loading, then a graceful fallback when the compositor can't capture.
         property bool timedOut: false
         Timer {
-            running: root.thumbnails && !view.hasContent
+            running: root.thumbnails && root.live && !view.hasContent
             interval: 1600
             onTriggered: frame.timedOut = true
         }

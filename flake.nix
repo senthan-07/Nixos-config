@@ -14,9 +14,14 @@
       url = "github:Sharwesh05/linux-omen-module/a6d5de8ce5b6ada973b8527eed5041f779b7b306";
       flake = false;
     };
+
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, catppuccin, linux-omen-module, ... }:
+  outputs = { self, nixpkgs, catppuccin, linux-omen-module, home-manager, ... }:
     let
       system = "x86_64-linux";
 
@@ -78,6 +83,17 @@
           modules = [
             ./configuration.nix
             catppuccin.nixosModules.catppuccin
+
+            # Per-user settings: ./home.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "hm-backup";
+                users.senthan = import ./home.nix;
+              };
+            }
 
             {
               nixpkgs.overlays = [

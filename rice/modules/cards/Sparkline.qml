@@ -37,15 +37,21 @@ Item {
     readonly property real step: width / Math.max(1, slots - 1)
 
     clip: true
+    function repaint() {
+        if (active) canvas.requestPaint();
+    }
     onValuesChanged: {
-        canvas.requestPaint();
+        repaint();
         if (active) slider.restart(); else slide = 1;
     }
-    onSecondaryValuesChanged: canvas.requestPaint()
-    onScaleMaxChanged: canvas.requestPaint()
-    onColorChanged: canvas.requestPaint()
-    onSecondaryColorChanged: canvas.requestPaint()
-    onActiveChanged: canvas.requestPaint()
+    onSecondaryValuesChanged: repaint()
+    onScaleMaxChanged: repaint()
+    onColorChanged: repaint()
+    onSecondaryColorChanged: repaint()
+    onActiveChanged: {
+        repaint();
+        if (!active) { slider.stop(); slide = 1; }
+    }
 
     NumberAnimation {
         id: slider
@@ -61,8 +67,8 @@ Item {
         width: root.width + root.step
         height: root.height
         visible: root.active
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
+        onWidthChanged: root.repaint()
+        onHeightChanged: root.repaint()
 
         onPaint: {
             const ctx = getContext("2d");

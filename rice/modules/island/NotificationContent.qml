@@ -130,6 +130,7 @@ Item {
                 textFormat: Text.StyledText
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
+                linkColor: root.critical ? Theme.errorContainerFg : Theme.primary
                 color: root.critical ? Theme.errorContainerFg : Theme.surfaceVariantFg
             }
 

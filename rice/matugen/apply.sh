@@ -42,6 +42,11 @@ marker="rice-matugen"
 kitty_files=(dark-theme.auto.conf light-theme.auto.conf no-preference-theme.auto.conf)
 import_line='@import url("rice-colors.css");'
 
+# Files a target overwrites in place: the user's own version is kept as
+# <file>.pre-rice and put back by `apply.sh restore <target>`.
+inplace_files=(kitty/dark-theme.auto.conf kitty/light-theme.auto.conf
+    kitty/no-preference-theme.auto.conf starship.toml)
+
 has() { [[ " ${RICE_TARGETS:-} " == *" $1 "* ]]; }
 live() { [[ "${RICE_LIVE:-0}" == 1 ]]; }
 generated() { [[ -f "$1" ]] && head -n 3 "$1" | grep -q "$marker"; }
@@ -58,6 +63,17 @@ restore() {
             fi
         done
         live && { pkill -USR1 -x kitty || pkill -USR1 -x .kitty-wrapped; } >/dev/null 2>&1
+        ;;
+    starship)
+        p="$conf/starship.toml"
+        if [[ -f "$p.pre-rice" ]]; then
+            mv -f "$p.pre-rice" "$p"
+        elif generated "$p"; then
+            rm -f "$p"
+        fi
+        ;;
+    nvim)
+        rm -f "$conf/nvim/lua/config/rice-colors-generated.lua"
         ;;
     gtk)
         for v in 3.0 4.0; do
@@ -88,13 +104,26 @@ cfg="$state/matugen.toml"
 printf '%s\n' "${RICE_MATUGEN_TOML:?}" >"$cfg.tmp" && mv -f "$cfg.tmp" "$cfg"
 
 # --- before rendering: keep the user's own files -------------------------------
-if has kitty; then
-    for f in "${kitty_files[@]}"; do
-        p="$conf/kitty/$f"
+# Targets that overwrite a file the user may have edited get one chance to keep
+# it as <file>.pre-rice; generated files are left alone so the backup is made
+# once, not on every wallpaper change.
+if has kitty || has starship; then
+    for rel in "${inplace_files[@]}"; do
+        case "$rel" in
+            kitty/*) has kitty || continue ;;
+            starship.toml) has starship || continue ;;
+        esac
+        p="$conf/$rel"
         if [[ -f "$p" ]] && ! generated "$p" && [[ ! -e "$p.pre-rice" ]]; then
-            cp -p "$p" "$p.pre-rice" && echo "warn kept your $f as $f.pre-rice"
+            cp -p "$p" "$p.pre-rice" && echo "warn kept your $rel as $rel.pre-rice"
         fi
     done
+fi
+
+# The Neovim palette is written into the LazyVim config tree; make sure the
+# directory exists even on a fresh checkout.
+if has nvim; then
+    mkdir -p "$conf/nvim/lua/config"
 fi
 
 # --- render --------------------------------------------------------------------

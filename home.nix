@@ -28,6 +28,11 @@ in
   # rice and Qt apps through qt5ct/qt6ct's icon_theme.
   home.packages = [
     (pkgs.papirus-icon-theme.override { color = "violet"; })
+
+    # LazyVim needs 0.10+; nixpkgs tracks a recent stable. The config itself is
+    # not a Home Manager file: it lives in Dotfiles/nvim and is linked into
+    # ~/.config/nvim by Dotfiles/symlink, so nothing here would own that path.
+    pkgs.neovim
   ];
 
   # ---- Cursor ----------------------------------------------------------------
@@ -35,6 +40,7 @@ in
   # X11/XWayland apps and ~/.icons/default. gtk.enable stays off: GTK gets it
   # from dconf and would otherwise write into the Dotfiles gtk-3.0 folder.
   home.pointerCursor = {
+    enable = true;
     package = pkgs.bibata-cursors;
     name = cursorTheme;
     size = cursorSize;

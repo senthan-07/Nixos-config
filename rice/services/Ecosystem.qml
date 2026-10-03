@@ -29,7 +29,9 @@ Singleton {
         { id: "btop", label: "btop", icon: "monitoring", description: "Theme \"rice\" for the system monitor" },
         { id: "cava", label: "cava", icon: "graphic_eq", description: "Audio visualizer gradient" },
         { id: "foot", label: "foot", icon: "terminal", description: "Include rice-colors.ini from foot.ini" },
-        { id: "fuzzel", label: "fuzzel", icon: "search", description: "Include rice-colors.ini from fuzzel.ini" }
+        { id: "fuzzel", label: "fuzzel", icon: "search", description: "Include rice-colors.ini from fuzzel.ini" },
+        { id: "nvim", label: "Neovim / LazyVim", icon: "code", description: "Highlight palette from the wallpaper (new instances)" },
+        { id: "starship", label: "Starship Prompt", icon: "command", description: "Prompt palette and icons from the wallpaper" }
     ]
 
     readonly property bool enabled: store.get("enabled", true)

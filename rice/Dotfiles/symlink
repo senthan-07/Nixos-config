@@ -16,6 +16,11 @@ for item in "$DOTFILES_DIR"/*; do
     # Skip unwanted files
     [[ "$name" == ".git" || "$name" == ".vscode" || "$name" == "README.md" || "$name" == "symlink" ]] && continue
 
+    # Skip rice/matugen backups and scratch files kept at the top level (e.g.
+    # starship.toml.pre-rice). Inside app dirs they are harmless, since the whole
+    # directory gets linked anyway.
+    [[ "$name" == *.pre-rice || "$name" == *.rice-tmp ]] && continue
+
     valid_names+=("$name")
 
     target="$CONFIG_DIR/$name"

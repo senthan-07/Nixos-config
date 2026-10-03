@@ -67,3 +67,17 @@ output_path = "@CONFIG@/fuzzel/rice-colors.ini"
 [templates.hyprland]
 input_path = "@TEMPLATES@/hypr-colors.lua"
 output_path = "@CONFIG@/hypr/Rice/wallpaper-colors.lua"
+
+# Highlight palette for LazyVim, applied on top of the LazyVim colourscheme by
+# rice/Dotfiles/nvim/lua/config/rice-colors.lua. No live reload: new Neovim
+# instances pick it up.
+[templates.nvim]
+input_path = "@TEMPLATES@/nvim-colors.lua"
+output_path = "@CONFIG@/nvim/lua/config/rice-colors-generated.lua"
+
+# Prompt colours/icons. Existing starship.toml is kept as starship.toml.pre-rice
+# and restored if the target is switched off. New shells read the new file;
+# running prompts pick it up on the next draw.
+[templates.starship]
+input_path = "@TEMPLATES@/starship.toml"
+output_path = "@CONFIG@/starship.toml"

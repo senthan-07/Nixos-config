@@ -153,6 +153,12 @@
     vim wget git efibootmgr fastfetch lm_sensors nvtopPackages.full
     btop mokutil tree wl-clipboard omen-tools python3 tmux openssl
     sbctl limine-full nix-ld ddcutil
+
+    # C toolchain. LazyVim's nvim-treesitter compiles its parsers with $CC
+    # (nvim-treesitter looks for `cc`, which gcc provides), and Mason uses it
+    # for any tool that has to build from source. Without this, parser installs
+    # fail with "No such file or directory: cc".
+    gcc
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

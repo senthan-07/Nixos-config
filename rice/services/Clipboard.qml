@@ -148,6 +148,13 @@ Singleton {
                 const t = {};
                 for (const k in root.texts) if (alive[k]) t[k] = root.texts[k];
                 root.texts = t;
+                // Prune images cache and delete orphaned files.
+                const img = {};
+                for (const k in root.images) {
+                    if (alive[k]) img[k] = root.images[k];
+                    else Io.unlink(root.images[k]);
+                }
+                root.images = img;
             }
         }
         stderr: StdioCollector {

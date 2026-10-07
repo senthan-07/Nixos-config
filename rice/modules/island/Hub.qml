@@ -58,7 +58,7 @@ FocusScope {
 
         // Sliding active indicator
         Rectangle {
-            readonly property Item target: tabRow.children[IslandState.tabs.indexOf(root.tab)] ?? null
+            readonly property Item target: tabRepeater.itemAt(IslandState.tabs.indexOf(root.tab)) ?? null
             x: 4 + (target?.x ?? 0)
             y: 4
             width: target?.width ?? 0
@@ -75,6 +75,7 @@ FocusScope {
             anchors.verticalCenter: parent.verticalCenter
 
             Repeater {
+                id: tabRepeater
                 model: [
                     { id: "media", icon: "music_note", label: "Media" },
                     { id: "focus", icon: "avg_pace", label: "Focus" },

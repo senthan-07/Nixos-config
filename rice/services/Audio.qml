@@ -50,7 +50,7 @@ Singleton {
 
     Connections {
         target: root.sink?.audio ?? null
-        function onVolumeChanged() { if (!settle.running) root.changed(); }
+        function onVolumesChanged() { if (!settle.running) root.changed(); }
         function onMutedChanged() { if (!settle.running) root.changed(); }
     }
 

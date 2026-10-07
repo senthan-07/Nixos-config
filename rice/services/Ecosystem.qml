@@ -21,9 +21,10 @@ Singleton {
     id: root
 
     // Targets shown in settings. `id` matches the prefix of the template names.
+    // GTK is absent: Noctalia owns application theming (GTK/Firefox/Qt) so
+    // rice only styles its own Quickshell panels and per-app extras.
     readonly property var apps: [
         { id: "kitty", label: "Kitty", icon: "terminal", description: "Terminal colours, follows dark/light automatically" },
-        { id: "gtk", label: "GTK 3 / 4", icon: "web_asset", description: "libadwaita and adw-gtk3 accent and surface colours" },
         { id: "qt", label: "Qt", icon: "widgets", description: "qt5ct / qt6ct colour scheme" },
         { id: "hyprland", label: "Hyprland", icon: "select_window", description: "Active and inactive window borders" },
         { id: "btop", label: "btop", icon: "monitoring", description: "Theme \"rice\" for the system monitor" },

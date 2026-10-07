@@ -2,11 +2,12 @@
 #
 # This sits alongside rice/Dotfiles: app configs stay in Dotfiles and are
 # linked into ~/.config by Dotfiles/symlink, and rice's matugen keeps writing
-# GTK/Qt colours there. Home Manager only handles things that aren't files in
-# Dotfiles: icon + cursor themes, GNOME/GTK settings (dconf), XDG user folders.
+# Quickshell/Qt colours there. Home Manager only handles things that aren't
+# files in Dotfiles: icon + cursor themes, GNOME/GTK settings (dconf), XDG
+# user folders, plus Noctalia + niri for the niri session.
 # Don't enable `gtk` / `qt` here: they would take over gtk-3.0, qt5ct and
 # qt6ct, which are Dotfiles links.
-{ config, pkgs, ... }:
+{ config, pkgs, noctalia, ... }:
 
 let
   iconTheme = "Papirus-Dark";
@@ -14,6 +15,10 @@ let
   cursorSize = 24;
 in
 {
+  imports = [
+    noctalia.homeModules.default
+  ];
+
   home.username = "senthan";
   home.homeDirectory = "/home/senthan";
   # Like system.stateVersion: the release this home was first set up with.
@@ -33,7 +38,34 @@ in
     # not a Home Manager file: it lives in Dotfiles/nvim and is linked into
     # ~/.config/nvim by Dotfiles/symlink, so nothing here would own that path.
     pkgs.neovim
+
+    # XWayland support for the niri session (niri doesn't ship this itself).
+    pkgs.xwayland-satellite
   ];
+
+  # ---- Noctalia (niri session shell) ------------------------------------------
+  # Owns all application theming in the niri session: GTK, Firefox, Qt,
+  # terminal colours. rice/matugen only styles Quickshell panels now.
+  programs.noctalia = {
+    enable = true;
+    systemd.enable = true;          # start with graphical-session.target
+    settings = {
+      theme = {
+        mode = "dark";
+        source = "builtin";
+        builtin = "Catppuccin";
+        templates = {
+          enable_builtin_templates = true;
+          builtin_ids = [ "gtk3" "gtk4" ];
+        };
+      };
+    };
+  };
+
+  # ---- niri config ------------------------------------------------------------
+  # Keybinds, monitors, window rules. Noctalia keybinds reference
+  # `noctalia msg ...` (launcher, control-center, volume, brightness).
+  xdg.configFile."niri/config.kdl".source = ./niri.kdl;
 
   # ---- Cursor ----------------------------------------------------------------
   # Also set for Hyprland in Dotfiles/hypr/Startup/autostart.lua. This covers

@@ -1,0 +1,315 @@
+// niri config for the Noctalia session.
+// Keybinds follow niri defaults where possible; Noctalia IPC binds are
+// documented at https://docs.noctalia.dev/noctalia/compositor-settings/niri/
+
+// ---- Input ------------------------------------------------------------------
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+    }
+}
+
+// ---- Outputs ----------------------------------------------------------------
+// Names from `niri msg outputs` inside a niri session.
+output "HDMI-A-1" {
+    mode "2560x1440@144.001"
+    scale 1
+    position x=0 y=0
+    focus-at-startup
+}
+
+output "eDP-1" {
+    mode "1920x1080@165.001"
+    scale 1
+    position x=2560 y=0
+}
+
+// ---- Layout -----------------------------------------------------------------
+layout {
+    gaps 8
+
+    center-focused-column "on-overflow"
+
+    default-column-width { proportion 0.5; }
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+    }
+
+    focus-ring {
+        width 4
+        active-color "#7fc8ff"
+        inactive-color "#505050"
+    }
+
+    border {
+        off
+    }
+
+    shadow {
+        softness 30
+        spread 5
+        offset x=0 y=5
+        color "#0007"
+    }
+}
+
+prefer-no-csd
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// ---- Startup ----------------------------------------------------------------
+spawn-at-startup "noctalia"
+spawn-at-startup "xwayland-satellite"
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+// ---- Noctalia compositor rules ----------------------------------------------
+// Rounded corners for all windows.
+window-rule {
+    geometry-corner-radius 20
+    clip-to-geometry true
+}
+
+// Floating Noctalia settings window.
+window-rule {
+    match app-id="dev.noctalia.Noctalia"
+    open-floating true
+    default-column-width { fixed 1080; }
+    default-window-height { fixed 920; }
+}
+
+// Firefox picture-in-picture.
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+    default-column-width { fixed 480; }
+    default-window-height { fixed 270; }
+    default-floating-position x=32 y=32 relative-to="bottom-right"
+}
+
+// Allow notification actions and window activation from Noctalia.
+debug {
+    honor-xdg-activation-with-invalid-serial
+}
+
+// Blurred overview wallpaper (Noctalia's backdrop layer inside niri overview).
+layer-rule {
+    match namespace="^noctalia-backdrop"
+    place-within-backdrop true
+}
+
+// ---- Blur (niri 26.04+) ------------------------------------------------------
+// Blur behind windows.
+window-rule {
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+// Noctalia surfaces: disable xray for realistic blur.
+layer-rule {
+    match namespace="^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd)$"
+    background-effect {
+        xray false
+    }
+}
+
+layer-rule {
+    match namespace="noctalia-window-switcher"
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+blur {
+    passes 2
+    offset 3.0
+    noise 0.03
+    saturation 1.0
+}
+
+// ---- Laptop ------------------------------------------------------------------
+switch-events {
+    lid-close {
+        spawn "noctalia" "msg" "session" "lock-and-suspend";
+    }
+}
+
+// ---- Binds -------------------------------------------------------------------
+binds {
+    // Hotkey overlay
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // ---- Noctalia IPC --------------------------------------------------------
+    Mod+Space hotkey-overlay-title="Open launcher" {
+        spawn-sh "noctalia msg panel-toggle launcher";
+    }
+
+    Mod+S hotkey-overlay-title="Open control center" {
+        spawn-sh "noctalia msg panel-toggle control-center";
+    }
+
+    Mod+Comma hotkey-overlay-title="Open Noctalia settings" {
+        spawn-sh "noctalia msg settings-toggle";
+    }
+
+    Alt+Tab hotkey-overlay-title="Window switcher" {
+        spawn-sh "noctalia msg window-switcher hold";
+    }
+
+    // ---- Applications --------------------------------------------------------
+    Mod+Return hotkey-overlay-title="Open terminal" {
+        spawn "kitty";
+    }
+
+    // ---- Audio ---------------------------------------------------------------
+    XF86AudioRaiseVolume allow-when-locked=true {
+        spawn-sh "noctalia msg volume-up";
+    }
+
+    XF86AudioLowerVolume allow-when-locked=true {
+        spawn-sh "noctalia msg volume-down";
+    }
+
+    XF86AudioMute allow-when-locked=true {
+        spawn-sh "noctalia msg volume-mute";
+    }
+
+    // ---- Brightness ----------------------------------------------------------
+    XF86MonBrightnessUp allow-when-locked=true {
+        spawn-sh "noctalia msg brightness-up";
+    }
+
+    XF86MonBrightnessDown allow-when-locked=true {
+        spawn-sh "noctalia msg brightness-down";
+    }
+
+    // ---- Window management ---------------------------------------------------
+    Mod+Q hotkey-overlay-title="Close window" { close-window; }
+
+    Mod+F hotkey-overlay-title="Maximize column" { maximize-column; }
+    Mod+M hotkey-overlay-title="Maximize window" { maximize-window-to-edges; }
+    Mod+Shift+F hotkey-overlay-title="Fullscreen window" { fullscreen-window; }
+
+    Mod+V hotkey-overlay-title="Toggle floating window" { toggle-window-floating; }
+    Mod+Shift+V hotkey-overlay-title="Switch focus floating/tiling" { switch-focus-between-floating-and-tiling; }
+
+    Mod+W hotkey-overlay-title="Toggle tabbed column" { toggle-column-tabbed-display; }
+
+    // ---- Focus ---------------------------------------------------------------
+    Mod+Left  { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Up    { focus-window-up; }
+    Mod+Down  { focus-window-down; }
+
+    Mod+H { focus-column-left; }
+    Mod+L { focus-column-right; }
+    Mod+K { focus-window-up; }
+    Mod+J { focus-window-down; }
+
+    // ---- Move windows / columns ----------------------------------------------
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Down  { move-window-down; }
+
+    Mod+Ctrl+H { move-column-left; }
+    Mod+Ctrl+L { move-column-right; }
+    Mod+Ctrl+K { move-window-up; }
+    Mod+Ctrl+J { move-window-down; }
+
+    // ---- Workspaces ----------------------------------------------------------
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+    Mod+U              { focus-workspace-down; }
+    Mod+I              { focus-workspace-up; }
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+Page_Up        { focus-workspace-up; }
+    Mod+Ctrl+U         { move-column-to-workspace-down; }
+    Mod+Ctrl+I         { move-column-to-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+
+    // ---- Monitor navigation ---------------------------------------------------
+    Mod+Ctrl+Left  { focus-monitor-left; }
+    Mod+Ctrl+Right { focus-monitor-right; }
+    Mod+Ctrl+Up    { focus-monitor-up; }
+    Mod+Ctrl+Down  { focus-monitor-down; }
+
+    Mod+Ctrl+Shift+Left  { move-column-to-monitor-left; }
+    Mod+Ctrl+Shift+Right { move-column-to-monitor-right; }
+    Mod+Ctrl+Shift+Up    { move-column-to-monitor-up; }
+    Mod+Ctrl+Shift+Down  { move-column-to-monitor-down; }
+
+    // ---- Column positioning ---------------------------------------------------
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    // ---- Column sizing ---------------------------------------------------------
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    // ---- Overview / column positioning -----------------------------------------
+    Mod+O repeat=false { toggle-overview; }
+    Mod+C { center-column; }
+
+    // ---- Consume / expel windows ------------------------------------------------
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+
+    // ---- Mouse wheel navigation ---------------------------------------------------
+    Mod+WheelScrollDown  cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp    cooldown-ms=150 { focus-workspace-up; }
+    Mod+WheelScrollRight { focus-column-right; }
+    Mod+WheelScrollLeft  { focus-column-left; }
+
+    // ---- Screenshots ---------------------------------------------------------------
+    Print { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+
+    // ---- System ------------------------------------------------------------------------
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Mod+Shift+E { quit; }
+}

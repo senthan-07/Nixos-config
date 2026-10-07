@@ -19,9 +19,15 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Noctalia shell for the niri session
+    noctalia = {
+      url = "github:noctalia-dev/noctalia";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, catppuccin, linux-omen-module, home-manager, ... }:
+  outputs = { self, nixpkgs, catppuccin, linux-omen-module, home-manager, noctalia, ... }:
     let
       system = "x86_64-linux";
 
@@ -91,6 +97,7 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 backupFileExtension = "hm-backup";
+                extraSpecialArgs = { inherit noctalia; };
                 users.senthan = import ./home.nix;
               };
             }

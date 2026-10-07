@@ -11,6 +11,7 @@
       # ./limine.nix
       ./user.nix
       ./rice.nix
+      ./niri.nix
       ./nvidia.nix
       ./services.nix
       ./auto-update.nix

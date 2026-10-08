@@ -43,6 +43,10 @@
       fd
       brave
       fish
+
+      #Documents
+      onlyoffice-desktopeditors
+      obsidian
     ];
   };
 

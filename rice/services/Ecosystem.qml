@@ -24,6 +24,7 @@ Singleton {
     // GTK is absent: Noctalia owns application theming (GTK/Firefox/Qt) so
     // rice only styles its own Quickshell panels and per-app extras.
     readonly property var apps: [
+        { id: "gtk", label: "GTK / Firefox", icon: "palette", description: "libadwaita + adw-gtk3 named colours (regenerates gtk-3.0/rice-colors.css + gtk-4.0/rice-colors.css)" },
         { id: "kitty", label: "Kitty", icon: "terminal", description: "Terminal colours, follows dark/light automatically" },
         { id: "qt", label: "Qt", icon: "widgets", description: "qt5ct / qt6ct colour scheme" },
         { id: "hyprland", label: "Hyprland", icon: "select_window", description: "Active and inactive window borders" },
